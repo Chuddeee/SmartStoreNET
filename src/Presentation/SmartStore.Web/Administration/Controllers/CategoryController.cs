@@ -21,6 +21,7 @@ using SmartStore.Services.Media;
 using SmartStore.Services.Security;
 using SmartStore.Services.Seo;
 using SmartStore.Services.Stores;
+using SmartStore.Web.Framework;
 using SmartStore.Web.Framework.Controllers;
 using SmartStore.Web.Framework.Filters;
 using SmartStore.Web.Framework.Modelling;
@@ -195,13 +196,8 @@ namespace SmartStore.Admin.Controllers
         [NonAction]
         private void PrepareAclModel(CategoryModel model, Category category, bool excludeProperties)
         {
-            if (model == null)
-                throw new ArgumentNullException("model");
+			Guard.NotNull(model, nameof(model));
 
-            model.AvailableCustomerRoles = _customerService
-                .GetAllCustomerRoles(true)
-                .Select(cr => cr.ToModel())
-                .ToList();
             if (!excludeProperties)
             {
                 if (category != null)
@@ -213,7 +209,9 @@ namespace SmartStore.Admin.Controllers
                     model.SelectedCustomerRoleIds = new int[0];
                 }
             }
-        }
+
+			model.AvailableCustomerRoles = _customerService.GetAllCustomerRoles(true).ToSelectListItems(model.SelectedCustomerRoleIds);
+		}
 
         [NonAction]
         protected void SaveCategoryAcl(Category category, CategoryModel model)
@@ -241,24 +239,14 @@ namespace SmartStore.Admin.Controllers
 		[NonAction]
 		private void PrepareStoresMappingModel(CategoryModel model, Category category, bool excludeProperties)
 		{
-			if (model == null)
-				throw new ArgumentNullException("model");
+			Guard.NotNull(model, nameof(model));
 
-			model.AvailableStores = _storeService
-				.GetAllStores()
-				.Select(s => s.ToModel())
-				.ToList();
 			if (!excludeProperties)
 			{
-				if (category != null)
-				{
-					model.SelectedStoreIds = _storeMappingService.GetStoresIdsWithAccess(category);
-				}
-				else
-				{
-					model.SelectedStoreIds = new int[0];
-				}
+				model.SelectedStoreIds = _storeMappingService.GetStoresIdsWithAccess(category);
 			}
+
+			model.AvailableStores = _storeService.GetAllStores().ToSelectListItems(model.SelectedStoreIds);
 		}
 
         #endregion
@@ -322,8 +310,8 @@ namespace SmartStore.Admin.Controllers
             };
         }
 
-        // Ajax
-        public ActionResult AllCategories(string label, int selectedId)
+		// Ajax
+		public ActionResult AllCategories(string label, int selectedId)
         {
 			var categoryTree = _categoryService.GetCategoryTree(includeHidden: true);
 			var categories = categoryTree.Flatten(false);
@@ -348,17 +336,8 @@ namespace SmartStore.Admin.Controllers
 			var mru = new MostRecentlyUsedList<string>(_workContext.CurrentCustomer.GetAttribute<string>(SystemCustomerAttributeNames.MostRecentlyUsedCategories),
 				_catalogSettings.MostRecentlyUsedCategoriesMaxSize);
 
-			// TODO: insert disabled option separator (select2 v.3.4.2 or higher required)
-			//if (mru.Count > 0)
-			//{
-			//	data.Insert(0, new
-			//	{
-			//		id = "",
-			//		text = "----------------------",
-			//		selected = false,
-			//		disabled = true
-			//	});
-			//}
+			// TODO: return two option groups... new JsonResult { Data = new object[] { new { text = "Last used", children = mruItems }, new { text = "All Categories", children = items } } };
+			// and load them through select2.ajax option.
 
 			for (int i = mru.Count - 1; i >= 0; --i)
 			{
@@ -847,12 +826,11 @@ namespace SmartStore.Admin.Controllers
         }
 
 		[HttpPost]
-		public ActionResult ProductAdd(int categoryId, string selectedProductIds)
+		public ActionResult ProductAdd(int categoryId, int[] selectedProductIds)
 		{
 			if (_permissionService.Authorize(StandardPermissionProvider.ManageCatalog))
 			{
-				var productIds = selectedProductIds.SplitSafe(",").Select(x => x.ToInt()).ToArray();
-				var products = _productService.GetProductsByIds(productIds);
+				var products = _productService.GetProductsByIds(selectedProductIds);
 				ProductCategory productCategory = null;
 				var maxDisplayOrder = -1;
 

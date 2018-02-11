@@ -19,6 +19,7 @@ using SmartStore.Web.Framework.Filters;
 using SmartStore.Web.Framework.Plugins;
 using SmartStore.Web.Framework.Security;
 using Telerik.Web.Mvc;
+using SmartStore.Web.Framework;
 
 namespace SmartStore.Admin.Controllers
 {
@@ -81,16 +82,13 @@ namespace SmartStore.Admin.Controllers
 
 		private void PrepareCurrencyModel(CurrencyModel model, Currency currency, bool excludeProperties)
 		{
-			if (model == null)
-				throw new ArgumentNullException("model");
+			Guard.NotNull(model, nameof(model));
 
 			var allStores = _services.StoreService.GetAllStores();
             var paymentMethods = _paymentService.GetAllPaymentMethods();
             var paymentProviders = _paymentService.LoadAllPaymentMethods().ToDictionarySafe(x => x.Metadata.SystemName);
 
-            model.AvailableStores = allStores.Select(s => s.ToModel()).ToList();
-
-            foreach (var paymentMethod in paymentMethods.Where(x => x.RoundOrderTotalEnabled))
+			foreach (var paymentMethod in paymentMethods.Where(x => x.RoundOrderTotalEnabled))
             {
                 string friendlyName = null;
                 Provider<IPaymentMethod> provider;
@@ -125,8 +123,10 @@ namespace SmartStore.Admin.Controllers
 
 			if (!excludeProperties)
 			{
-				model.SelectedStoreIds = (currency == null ? new int[0] : _storeMappingService.GetStoresIdsWithAccess(currency));
+				model.SelectedStoreIds = _storeMappingService.GetStoresIdsWithAccess(currency);
 			}
+
+			model.AvailableStores = allStores.ToSelectListItems(model.SelectedStoreIds);
 		}
 
 		private CurrencyModel CreateCurrencyListModel(Currency currency)

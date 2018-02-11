@@ -169,13 +169,10 @@ namespace SmartStore.Services.Catalog
         /// <returns>The stock message</returns>
         public static string FormatStockMessage(this Product product, ILocalizationService localizationService)
         {
-			if (product == null)
-				throw new ArgumentNullException("product");
+			Guard.NotNull(product, nameof(product));
+			Guard.NotNull(localizationService, nameof(localizationService));
 
-            if (localizationService == null)
-                throw new ArgumentNullException("localizationService");
-
-            string stockMessage = string.Empty;
+			string stockMessage = string.Empty;
 
             if ((product.ManageInventoryMethod == ManageInventoryMethod.ManageStock || product.ManageInventoryMethod == ManageInventoryMethod.ManageStockByAttributes)
                 && product.DisplayStockAvailability)
@@ -232,11 +229,10 @@ namespace SmartStore.Services.Catalog
 
 		public static bool ProductTagExists(this Product product, int productTagId)
         {
-            if (product == null)
-                throw new ArgumentNullException("product");
+			Guard.NotNull(product, nameof(product));
 
-            bool result = product.ProductTags.ToList().Find(pt => pt.Id == productTagId) != null;
-            return result;
+			var result = product.ProductTags.Any(x => x.Id == productTagId);
+			return result;
         }
 
         /// <summary>
@@ -246,10 +242,9 @@ namespace SmartStore.Services.Catalog
         /// <returns>Result</returns>
 		public static int[] ParseAllowedQuatities(this Product product)
         {
-			if (product == null)
-				throw new ArgumentNullException("product");
+			Guard.NotNull(product, nameof(product));
 
-            var result = new List<int>();
+			var result = new List<int>();
             if (!String.IsNullOrWhiteSpace(product.AllowedQuantities))
             {
                 product
@@ -271,8 +266,7 @@ namespace SmartStore.Services.Catalog
 
 		public static int[] ParseRequiredProductIds(this Product product)
 		{
-			if (product == null)
-				throw new ArgumentNullException("product");
+			Guard.NotNull(product, nameof(product));
 
 			if (String.IsNullOrEmpty(product.RequiredProductIds))
 				return new int[0];

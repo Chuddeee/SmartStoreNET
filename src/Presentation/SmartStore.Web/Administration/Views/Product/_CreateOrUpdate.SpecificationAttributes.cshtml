@@ -124,9 +124,9 @@
 					&nbsp;
 				</td>
 				<td class="adminData">
-					<button type="button" name="addProductSpec" id="addProductSpec" class="btn btn-warning">
+					<button type="button" name="addProductSpec" id="addProductSpec" class="btn btn-primary">
 						<i class="fa fa-plus"></i>
-						@T("Admin.Catalog.Products.SpecificationAttributes.AddButton")
+						<span>@T("Admin.Catalog.Products.SpecificationAttributes.AddButton")</span>
 					</button>
 				</td>
             </tr>
@@ -136,10 +136,6 @@
 	
         <div>
             <script type="text/javascript">
-                $(function() {
-                    $.fn.editable.defaults.mode = 'inline';
-                });
-
                 function OnCommand(e) {
                     var link = $(e.row).find(".spec-attr-opt");
                     if(e.name == "edit") {
@@ -158,23 +154,33 @@
                 }
 
                 function initXEditable(link){
+                	if (!$.fn.editable)
+                		return;
 
                     link.editable({
                         type: 'select2',
                         url: '@Url.Action("SetAttributeValue", "SpecificationAttribute")',
-                        unsavedclass: null,
-                        placement: "center",
+						unsavedclass: null,
+						inputclass: 'form-control form-control-sm',
+						mode: 'popup',
+                        placement: 'right',
                         autotext: 'auto',
-                        select2: {
+						select2: {
                             minimumResultsForSearch: 8,
                             data: link.data("options") || [],
-                            initSelection: function (el, fn) {
-                                var id = $(el).val();
+							initSelection: function (el, fn) {
+								var id = $(el).val();
                                 if (id !== "") {
                                     fn({ id: link.data("value"), text: link.text() });
                                 }
                             }
-                        },
+						},
+						display: function (value, sourceData) {
+							// ABS4: display new value, otherwise always 'empty' is displayed.
+							if (sourceData && sourceData.success) {
+								$(this).html(sourceData.name);
+							}
+						},
                         success: function (response, newValue)
                         {                       	
                         	if (response.success) {
@@ -231,7 +237,7 @@
 					{
 						commands.Edit().Localize(T);
 						commands.Delete().Localize(T);
-					}).Width(180);
+					}).Width(180).HtmlAttributes(new { align = "right" });
 				})
 				.ClientEvents(e =>
 				{

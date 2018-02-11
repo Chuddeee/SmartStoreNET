@@ -466,7 +466,7 @@ namespace SmartStore.Web.Controllers
         [CaptchaValidator]
         public ActionResult Login(LoginModel model, string returnUrl, bool captchaValid)
         {
-            // validate CAPTCHA
+            // Validate CAPTCHA.
             if (_captchaSettings.Enabled && _captchaSettings.ShowOnLoginPage && !captchaValid)
             {
                 ModelState.AddModelError("", _localizationService.GetResource("Common.WrongCaptcha"));
@@ -481,19 +481,18 @@ namespace SmartStore.Web.Controllers
 
                 if (_customerRegistrationService.ValidateCustomer(_customerSettings.UsernamesEnabled ? model.Username : model.Email, model.Password))
                 {
-                    var customer = _customerSettings.UsernamesEnabled ? _customerService.GetCustomerByUsername(model.Username) : _customerService.GetCustomerByEmail(model.Email);
+                    var customer = _customerSettings.UsernamesEnabled 
+						? _customerService.GetCustomerByUsername(model.Username) 
+						: _customerService.GetCustomerByEmail(model.Email);
 
-                    // migrate shopping cart
                     _shoppingCartService.MigrateShoppingCart(_workContext.CurrentCustomer, customer);
 
-                    // sign in new customer
                     _authenticationService.SignIn(customer, model.RememberMe);
 
-                    // activity log
                     _customerActivityService.InsertActivity("PublicStore.Login", _localizationService.GetResource("ActivityLog.PublicStore.Login"), customer);
 
-					// confusing when login page redirects to itself
-					if (returnUrl.IsEmpty() || returnUrl.Contains(@"/login?"))
+					// Redirect home where redirect to referrer would be confusing.
+					if (returnUrl.IsEmpty() || returnUrl.Contains(@"/login?") || returnUrl.Contains(@"/passwordrecoveryconfirm"))
 					{
 						return RedirectToRoute("HomePage");
 					}
@@ -506,23 +505,24 @@ namespace SmartStore.Web.Controllers
                 }
             }
 
-            //If we got this far, something failed, redisplay form
+            // If we got this far, something failed, redisplay form.
             model.UsernamesEnabled = _customerSettings.UsernamesEnabled;
             model.DisplayCaptcha = _captchaSettings.Enabled && _captchaSettings.ShowOnLoginPage;
+
             return View(model);
         }
 
         [RequireHttpsByConfigAttribute(SslRequirement.Yes)]
         public ActionResult Register()
         {
-            //check whether registration is allowed
-            if (_customerSettings.UserRegistrationType == UserRegistrationType.Disabled)
-                return RedirectToRoute("RegisterResult", new { resultId = (int)UserRegistrationType.Disabled });
+			//check whether registration is allowed
+			if (_customerSettings.UserRegistrationType == UserRegistrationType.Disabled)
+			{
+				return RedirectToRoute("RegisterResult", new { resultId = (int)UserRegistrationType.Disabled });
+			}
 
             var model = new RegisterModel();
             model.AllowCustomersToSetTimeZone = _dateTimeSettings.AllowCustomersToSetTimeZone;
-            foreach (var tzi in _dateTimeHelper.GetSystemTimeZones())
-                model.AvailableTimeZones.Add(new SelectListItem() { Text = tzi.DisplayName, Value = tzi.Id, Selected = (tzi.Id == _dateTimeHelper.DefaultStoreTimeZone.Id) });
             model.DisplayVatNumber = _taxSettings.EuVatEnabled;
             model.VatRequired = _taxSettings.VatRequired;
             //form fields
@@ -548,26 +548,34 @@ namespace SmartStore.Web.Controllers
             model.UsernamesEnabled = _customerSettings.UsernamesEnabled;
             model.CheckUsernameAvailabilityEnabled = _customerSettings.CheckUsernameAvailabilityEnabled;
             model.DisplayCaptcha = _captchaSettings.Enabled && _captchaSettings.ShowOnRegistrationPage;
-            if (_customerSettings.CountryEnabled)
+
+			foreach (var tzi in _dateTimeHelper.GetSystemTimeZones())
+			{
+				model.AvailableTimeZones.Add(new SelectListItem { Text = tzi.DisplayName, Value = tzi.Id, Selected = (tzi.Id == _dateTimeHelper.DefaultStoreTimeZone.Id) });
+			}
+
+			if (_customerSettings.CountryEnabled)
             {
-                model.AvailableCountries.Add(new SelectListItem() { Text = _localizationService.GetResource("Address.SelectCountry"), Value = "0" });
+                model.AvailableCountries.Add(new SelectListItem { Text = _localizationService.GetResource("Address.SelectCountry"), Value = "0" });
                 foreach (var c in _countryService.GetAllCountries())
                 {
-                    model.AvailableCountries.Add(new SelectListItem() { Text = c.GetLocalized(x => x.Name), Value = c.Id.ToString() });
+                    model.AvailableCountries.Add(new SelectListItem { Text = c.GetLocalized(x => x.Name), Value = c.Id.ToString() });
                 }
                 
                 if (_customerSettings.StateProvinceEnabled)
                 {
-                    //states
                     var states = _stateProvinceService.GetStateProvincesByCountryId(model.CountryId).ToList();
-                    if (states.Count > 0)
-                    {
-                        foreach (var s in states)
-                            model.AvailableStates.Add(new SelectListItem() { Text = s.GetLocalized(x => x.Name), Value = s.Id.ToString(), Selected = (s.Id == model.StateProvinceId) });
-                    }
-                    else
-                        model.AvailableStates.Add(new SelectListItem() { Text = _localizationService.GetResource("Address.OtherNonUS"), Value = "0" });
-
+					if (states.Count > 0)
+					{
+						foreach (var s in states)
+						{
+							model.AvailableStates.Add(new SelectListItem { Text = s.GetLocalized(x => x.Name), Value = s.Id.ToString(), Selected = (s.Id == model.StateProvinceId) });
+						}
+					}
+					else
+					{
+						model.AvailableStates.Add(new SelectListItem { Text = _localizationService.GetResource("Address.OtherNonUS"), Value = "0" });
+					}
                 }
             }
 
@@ -930,31 +938,30 @@ namespace SmartStore.Web.Controllers
         public ActionResult AccountActivation(string token, string email)
         {
             var customer = _customerService.GetCustomerByEmail(email);
-
             if (customer == null)
             {
-                NotifyError(_services.Localization.GetResource("Account.PasswordRecoveryConfirm.InvalidEmail"));
+                NotifyError(T("Account.AccountActivation.InvalidEmailOrToken"));
                 return RedirectToRoute("HomePage");
             }
-				
 
             var cToken = customer.GetAttribute<string>(SystemCustomerAttributeNames.AccountActivationToken);
-            if (String.IsNullOrEmpty(cToken) || !cToken.Equals(token, StringComparison.InvariantCultureIgnoreCase))
+            if (cToken.IsEmpty() || !cToken.Equals(token, StringComparison.InvariantCultureIgnoreCase))
             {
-                NotifyError(_services.Localization.GetResource("Account.PasswordRecoveryConfirm.InvalidToken"));
+                NotifyError(T("Account.AccountActivation.InvalidEmailOrToken"));
                 return RedirectToRoute("HomePage");
             }
 			
-            // Activate user account
+            // Activate user account.
             customer.Active = true;
             _customerService.UpdateCustomer(customer);
             _genericAttributeService.SaveAttribute(customer, SystemCustomerAttributeNames.AccountActivationToken, "");
 
-			// Send welcome message
+			// Send welcome message.
 			Services.MessageFactory.SendCustomerWelcomeMessage(customer, _workContext.WorkingLanguage.Id);
             
             var model = new AccountActivationModel();
-            model.Result = _localizationService.GetResource("Account.AccountActivation.Activated");
+            model.Result = T("Account.AccountActivation.Activated");
+
             return View(model);
         }
 
@@ -1526,96 +1533,74 @@ namespace SmartStore.Web.Controllers
 				return RedirectToAction("Info");
 
             var customer = _workContext.CurrentCustomer;
+			var avatarId = customer.GetAttribute<int>(SystemCustomerAttributeNames.AvatarPictureId);
 
-            var model = new CustomerAvatarModel();
+			var model = new CustomerAvatarModel();
 			model.MaxFileSize = Prettifier.BytesToString(_customerSettings.AvatarMaximumSizeBytes);
-            model.AvatarUrl = _pictureService.GetUrl(
-                customer.GetAttribute<int>(SystemCustomerAttributeNames.AvatarPictureId),
-                _mediaSettings.AvatarPictureSize,
-                FallbackPictureType.NoFallback);
-            return View(model);
+            model.AvatarUrl = _pictureService.GetUrl(avatarId, _mediaSettings.AvatarPictureSize, FallbackPictureType.NoFallback);
+			model.PictureFallbackUrl = _pictureService.GetFallbackUrl(0, FallbackPictureType.Avatar);
+
+			return View(model);
         }
 
-        [HttpPost, ActionName("Avatar")]
-        [FormValueRequired("upload-avatar")]
-        public ActionResult UploadAvatar(CustomerAvatarModel model, HttpPostedFileBase uploadedFile)
-        {
-            if (!IsCurrentUserRegistered())
-                return new HttpUnauthorizedResult();
+		[HttpPost]
+		public ActionResult UploadAvatar()
+		{
+			var success = false;
+			string avatarUrl = null;
 
-            if (!_customerSettings.AllowCustomersToUploadAvatars)
-				return RedirectToAction("Info");
+			if (IsCurrentUserRegistered() && _customerSettings.AllowCustomersToUploadAvatars)
+			{
+				var customer = _workContext.CurrentCustomer;
+				var uploadedFile = Request.Files["uploadedFile-file"].ToPostedFileResult();
 
-            var customer = _workContext.CurrentCustomer;
-
-			model.MaxFileSize = Prettifier.BytesToString(_customerSettings.AvatarMaximumSizeBytes);
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    var customerAvatar = _pictureService.GetPictureById(customer.GetAttribute<int>(SystemCustomerAttributeNames.AvatarPictureId));
-
-					if ((uploadedFile != null) && (!String.IsNullOrEmpty(uploadedFile.FileName)))
+				if (uploadedFile != null && uploadedFile.FileName.HasValue())
+				{
+					if (uploadedFile.Size > _customerSettings.AvatarMaximumSizeBytes)
 					{
-						var avatarMaxSize = _customerSettings.AvatarMaximumSizeBytes;
-
-						if (uploadedFile.ContentLength > avatarMaxSize)
-							throw new SmartException(T("Account.Avatar.MaximumUploadedFileSize", Prettifier.BytesToString(avatarMaxSize)));
-
-						byte[] customerPictureBinary = uploadedFile.InputStream.ToByteArray();
-
-						if (customerAvatar != null)
-							customerAvatar = _pictureService.UpdatePicture(customerAvatar.Id, customerPictureBinary, uploadedFile.ContentType, null, true);
-						else
-							customerAvatar = _pictureService.InsertPicture(customerPictureBinary, uploadedFile.ContentType, null, true, false);
+						throw new SmartException(T("Account.Avatar.MaximumUploadedFileSize", Prettifier.BytesToString(_customerSettings.AvatarMaximumSizeBytes)));
 					}
-					else if (customerAvatar != null)
+
+					var customerAvatar = _pictureService.GetPictureById(customer.GetAttribute<int>(SystemCustomerAttributeNames.AvatarPictureId));
+					if (customerAvatar != null)
 					{
+						// Remove from cache.
 						_pictureService.DeletePicture(customerAvatar);
-						customerAvatar = null;
 					}
 
-                    var customerAvatarId = (customerAvatar != null ? customerAvatar.Id : 0);
+					customerAvatar = _pictureService.InsertPicture(uploadedFile.Buffer, uploadedFile.ContentType, null, true, false);
 
-                    _genericAttributeService.SaveAttribute(customer, SystemCustomerAttributeNames.AvatarPictureId, customerAvatarId);
+					_genericAttributeService.SaveAttribute(customer, SystemCustomerAttributeNames.AvatarPictureId, customerAvatar.Id);
 
-                    model.AvatarUrl = _pictureService.GetUrl(customerAvatarId, _mediaSettings.AvatarPictureSize, false);
+					avatarUrl = _pictureService.GetUrl(customerAvatar.Id, _mediaSettings.AvatarPictureSize, false);
+					success = avatarUrl.HasValue();
+				}
+			}
 
-					return View(model);
-                }
-                catch (Exception exc)
-                {
-                    ModelState.AddModelError("", exc.Message);
-                }
-            }
+			return Json(new { success, avatarUrl });
+		}
 
-            //If we got this far, something failed, redisplay form
-            model.AvatarUrl = _pictureService.GetUrl(customer.GetAttribute<int>(SystemCustomerAttributeNames.AvatarPictureId), _mediaSettings.AvatarPictureSize, false);
+		[HttpPost]
+		public ActionResult RemoveAvatar()
+		{
+			var success = false;
 
-            return View(model);
-        }
+			if (IsCurrentUserRegistered() && _customerSettings.AllowCustomersToUploadAvatars)
+			{
+				var customer = _workContext.CurrentCustomer;
 
-        [HttpPost, ActionName("Avatar")]
-        [FormValueRequired("remove-avatar")]
-        public ActionResult RemoveAvatar(CustomerAvatarModel model, HttpPostedFileBase uploadedFile)
-        {
-            if (!IsCurrentUserRegistered())
-                return new HttpUnauthorizedResult();
+				var customerAvatar = _pictureService.GetPictureById(customer.GetAttribute<int>(SystemCustomerAttributeNames.AvatarPictureId));
+				if (customerAvatar != null)
+				{
+					_pictureService.DeletePicture(customerAvatar);
+				}
 
-            if (!_customerSettings.AllowCustomersToUploadAvatars)
-				return RedirectToAction("Info");
+				_genericAttributeService.SaveAttribute(customer, SystemCustomerAttributeNames.AvatarPictureId, 0);
+				success = true;
+			}
 
-            var customer = _workContext.CurrentCustomer;
-            
-            var customerAvatar = _pictureService.GetPictureById(customer.GetAttribute<int>(SystemCustomerAttributeNames.AvatarPictureId));
-            if (customerAvatar != null)
-                _pictureService.DeletePicture(customerAvatar);
-
-            _genericAttributeService.SaveAttribute(customer, SystemCustomerAttributeNames.AvatarPictureId, 0);
-
-            return RedirectToAction("Avatar");
-        }
+			return Json(new { success });
+		}
 
         #endregion
 
@@ -1664,9 +1649,9 @@ namespace SmartStore.Web.Controllers
             var customer = _customerService.GetCustomerByEmail(email);
 			customer = Services.WorkContext.CurrentCustomer;
 
-            if (customer == null )
+            if (customer == null)
             {
-                NotifyError(_services.Localization.GetResource("Account.PasswordRecoveryConfirm.InvalidEmail"));
+                NotifyError(T("Account.PasswordRecoveryConfirm.InvalidEmailOrToken"));
             }
             
             var model = new PasswordRecoveryConfirmModel();
@@ -1680,17 +1665,16 @@ namespace SmartStore.Web.Controllers
             var customer = _customerService.GetCustomerByEmail(email);
             if (customer == null)
             {
-                NotifyError(_services.Localization.GetResource("Account.PasswordRecoveryConfirm.InvalidEmail"));
+                NotifyError(T("Account.PasswordRecoveryConfirm.InvalidEmailOrToken"));
                 return PasswordRecoveryConfirm(token, email);
             }
-
 
             var cPrt = customer.GetAttribute<string>(SystemCustomerAttributeNames.PasswordRecoveryToken);
-            if (String.IsNullOrEmpty(cPrt) || !cPrt.Equals(token, StringComparison.InvariantCultureIgnoreCase))
+            if (cPrt.IsEmpty() || !cPrt.Equals(token, StringComparison.InvariantCultureIgnoreCase))
             {
-                NotifyError(_services.Localization.GetResource("Account.PasswordRecoveryConfirm.InvalidToken"));
-                return PasswordRecoveryConfirm(token, email);
-            }
+				NotifyError(T("Account.PasswordRecoveryConfirm.InvalidEmailOrToken"));
+				return PasswordRecoveryConfirm(token, email);
+			}
 			
             if (ModelState.IsValid)
             {
@@ -1701,7 +1685,7 @@ namespace SmartStore.Web.Controllers
                     _genericAttributeService.SaveAttribute(customer, SystemCustomerAttributeNames.PasswordRecoveryToken, "");
 
                     model.SuccessfullyChanged = true;
-                    model.Result = _services.Localization.GetResource("Account.PasswordRecovery.PasswordHasBeenChanged");
+                    model.Result = T("Account.PasswordRecovery.PasswordHasBeenChanged");
                 }
                 else
                 {
@@ -1711,7 +1695,7 @@ namespace SmartStore.Web.Controllers
                 return View(model);
             }
 
-            //If we got this far, something failed, redisplay form
+            // If we got this far, something failed, redisplay form.
             return View(model);
         }
 

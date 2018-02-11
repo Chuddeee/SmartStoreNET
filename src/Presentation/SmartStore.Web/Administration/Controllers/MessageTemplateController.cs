@@ -16,6 +16,11 @@ using SmartStore.Web.Framework.Filters;
 using SmartStore.Web.Framework.Security;
 using Telerik.Web.Mvc;
 using SmartStore.Templating;
+using SmartStore.Web.Framework;
+using SmartStore.Core.Caching;
+using SmartStore.Core.Email;
+using System.Threading.Tasks;
+using System.Web.Caching;
 
 namespace SmartStore.Admin.Controllers
 {
@@ -23,9 +28,11 @@ namespace SmartStore.Admin.Controllers
     public partial class MessageTemplateController : AdminControllerBase
     {
         private readonly IMessageTemplateService _messageTemplateService;
+		private readonly ICampaignService _campaignService;
 		private readonly IMessageFactory _messageFactory;
 		private readonly IEmailAccountService _emailAccountService;
-        private readonly ILanguageService _languageService;
+		private readonly IEmailSender _emailSender;
+		private readonly ILanguageService _languageService;
         private readonly ILocalizedEntityService _localizedEntityService;
         private readonly ILocalizationService _localizationService;
         private readonly IPermissionService _permissionService;
@@ -35,8 +42,10 @@ namespace SmartStore.Admin.Controllers
 
 		public MessageTemplateController(
 			IMessageTemplateService messageTemplateService,
+			ICampaignService campaignService,
 			IMessageFactory messageFactory,
-			IEmailAccountService emailAccountService, 
+			IEmailAccountService emailAccountService,
+			IEmailSender emailSender,
 			ILanguageService languageService, 
             ILocalizedEntityService localizedEntityService,
             ILocalizationService localizationService, 
@@ -46,8 +55,10 @@ namespace SmartStore.Admin.Controllers
 			EmailAccountSettings emailAccountSettings)
         {
             _messageTemplateService = messageTemplateService;
+			_campaignService = campaignService;
 			_messageFactory = messageFactory;
             _emailAccountService = emailAccountService;
+			_emailSender = emailSender;
             _languageService = languageService;
             _localizedEntityService = localizedEntityService;
             _localizationService = localizationService;
@@ -83,24 +94,14 @@ namespace SmartStore.Admin.Controllers
 		[NonAction]
 		private void PrepareStoresMappingModel(MessageTemplateModel model, MessageTemplate messageTemplate, bool excludeProperties)
 		{
-			if (model == null)
-				throw new ArgumentNullException("model");
+			Guard.NotNull(model, nameof(model));
 
-			model.AvailableStores = _storeService
-				.GetAllStores()
-				.Select(s => s.ToModel())
-				.ToList();
 			if (!excludeProperties)
 			{
-				if (messageTemplate != null)
-				{
-					model.SelectedStoreIds = _storeMappingService.GetStoresIdsWithAccess(messageTemplate);
-				}
-				else
-				{
-					model.SelectedStoreIds = new int[0];
-				}
+				model.SelectedStoreIds = _storeMappingService.GetStoresIdsWithAccess(messageTemplate);
 			}
+
+			model.AvailableStores = _storeService.GetAllStores().ToSelectListItems(model.SelectedStoreIds);
 		}
 
         public ActionResult Index()
@@ -184,7 +185,7 @@ namespace SmartStore.Admin.Controllers
                 var emailAccountId = messageTemplate.GetLocalized(x => x.EmailAccountId, languageId, false, false);
                 locale.EmailAccountId = emailAccountId > 0 ? emailAccountId : _emailAccountSettings.DefaultEmailAccountId;
             });
-			
+
 			return View(model);
         }
 		
@@ -234,7 +235,8 @@ namespace SmartStore.Admin.Controllers
 			
 			// Store
 			PrepareStoresMappingModel(model, messageTemplate, true);
-            return View(model);
+
+			return View(model);
         }
 
 		[HttpPost]
@@ -253,47 +255,120 @@ namespace SmartStore.Admin.Controllers
 			return RedirectToAction("List");
 		}
 
-		public ActionResult Preview(int id)
+		public ActionResult Preview(int id, bool isCampaign = false)
 		{
-			// TODO: (mc) Liquid > Display info about preview models
-			var template = _messageTemplateService.GetMessageTemplateById(id);
-			if (template == null)
+			var model = new MessageTemplatePreviewModel();
+
+			if (!Services.Permissions.Authorize(isCampaign ? StandardPermissionProvider.ManageCampaigns: StandardPermissionProvider.ManageMessageTemplates))
 			{
-				return RedirectToAction("List");
+				model.Error = T("Admin.AccessDenied.Description");
+				return View(model);
+			}
+
+			// TODO: (mc) Liquid > Display info about preview models
+			try
+			{
+				CreateMessageResult result = null;
+
+				if (isCampaign)
+				{
+					var campaign = _campaignService.GetCampaignById(id);
+					if (campaign == null)
+					{
+						model.Error = "The request campaign does not exist.";
+						return View(model);
+					}
+					
+					result = _campaignService.Preview(campaign);
+				}
+				else
+				{
+					var template = _messageTemplateService.GetMessageTemplateById(id);
+					if (template == null)
+					{
+						model.Error = "The request message template does not exist.";
+						return View(model);
+					}
+
+					var messageContext = new MessageContext
+					{
+						MessageTemplate = template,
+						TestMode = true
+					};
+
+					result = _messageFactory.CreateMessage(messageContext, false);
+				}
+
+				var email = result.Email;
+
+				model.AccountEmail = email.EmailAccount?.Email ?? result.MessageContext.EmailAccount?.Email;
+				model.EmailAccountId = email.EmailAccountId;
+				model.Bcc = email.Bcc;
+				model.Body = email.Body;
+				model.From = email.From;
+				model.ReplyTo = email.ReplyTo;
+				model.Subject = email.Subject;
+				model.To = email.To;
+				model.Error = null;
+				model.Token = Guid.NewGuid().ToString();
+				model.BodyUrl = Url.Action("PreviewBody", new { token = model.Token });
+
+				HttpContext.Cache.Insert("mtpreview:" + model.Token, model, null, Cache.NoAbsoluteExpiration, TimeSpan.FromMinutes(1));
+			}
+			catch (Exception ex)
+			{
+				model.Error = ex.ToAllMessages();
+			}
+
+			return View(model);
+		}
+
+		public ActionResult PreviewBody(string token)
+		{
+			var body = GetPreviewMailModel(token)?.Body;
+
+			if (body.IsEmpty())
+			{
+				body = "<div style='padding:20px;font-family:sans-serif;color:red'>{0}</div>".FormatCurrent(T("Admin.MessageTemplate.Preview.NoBody"));
+			}
+
+			return Content(body, "text/html");
+		}
+
+		[HttpPost]
+		public async Task<ActionResult> SendTestMail(string token, string to)
+		{
+			var model = GetPreviewMailModel(token);
+			if (model == null)
+			{
+				return Json(new { success = false, message = "Preview result not available anymore. Try again." });
 			}
 
 			try
 			{
-				var context = new MessageContext
-				{
-					MessageTemplate = template,
-					TestMode = true
-				};
-
-				var result = _messageFactory.CreateMessage(context, false);
-				var messageModel = result.Model;
-
-				return View(result);
+				var account = _emailAccountService.GetEmailAccountById(model.EmailAccountId) ?? _emailAccountService.GetDefaultEmailAccount();
+				var msg = new EmailMessage(to, model.Subject, model.Body, model.From);
+				await _emailSender.SendEmailAsync(new SmtpContext(account), msg);
+				return Json(new { success = true });
 			}
 			catch (Exception ex)
 			{
 				NotifyError(ex);
-				return RedirectToAction("Edit", template.Id);
+				return Json(new { success = false, message = ex.Message });
 			}
 		}
 
 		[HttpPost]
-		[ValidateInput(false)]
-		public ActionResult Preview(CreateMessageResult messageResult)
+		public ActionResult PreservePreview(string token)
 		{
-			var template = _messageTemplateService.GetMessageTemplateById(messageResult.MessageContext.MessageTemplate.Id);
-			var context = new MessageContext { MessageTemplate = template };
+			// WHile the preview window is open, the preview model should not expire
+			GetPreviewMailModel(token);
+			return Content(token);
+		}
 
-			_messageFactory.QueueMessage(context, messageResult.Email);
-
-			NotifySuccess(_localizationService.GetResource("Admin.ContentManagement.MessageTemplates.Preview.SuccessfullySent"));
-
-			return RedirectToAction("Edit", new { id = messageResult.MessageContext.MessageTemplate.Id });
+		private MessageTemplatePreviewModel GetPreviewMailModel(string token)
+		{
+			return (MessageTemplatePreviewModel)HttpContext.Cache.Get("mtpreview:" + token);
 		}
 
 		[HttpPost, ActionName("Edit")]
@@ -341,6 +416,17 @@ namespace SmartStore.Admin.Controllers
 				NotifyError(exc.Message);
 				return RedirectToAction("Edit", new { id = model.Id });
 			}
+		}
+
+		public ActionResult ImportAllTemplates()
+		{
+			// Hidden action for admins
+			var converter = new MessageTemplateConverter(Services.DbContext);
+			converter.ImportAll(Services.WorkContext.WorkingLanguage);
+
+			NotifySuccess("All file based message templates imported successfully.");
+
+			return RedirectToAction("List");
 		}
     }
 }

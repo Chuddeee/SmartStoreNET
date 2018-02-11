@@ -7,17 +7,14 @@ namespace SmartStore.Web.Models.Entity
 {
 	public class EntityPickerModel : ModelBase
 	{
-		public string AllString { get; set; }
-		public string PublishedString { get; set; }
-		public string UnpublishedString { get; set; }
-
-		public string Entity { get; set; }
+		public string EntityType { get; set; }
 		public bool HighligtSearchTerm { get; set; }
 		public string DisableIf { get; set; }
 		public string DisableIds { get; set; }
 		public string SearchTerm { get; set; }
 		public string ReturnField { get; set; }
-		public int MaxReturnValues { get; set; }
+		public int MaxItems { get; set; }
+		public string PreselectedEntityIds { get; set; }
 		public int PageIndex { get; set; }
 		public int PageSize { get; set; }
 
@@ -40,11 +37,6 @@ namespace SmartStore.Web.Models.Entity
 		[SmartResourceDisplayName("Admin.Catalog.Products.List.SearchProductType")]
 		public int ProductTypeId { get; set; }
 
-		public IList<SelectListItem> AvailableCategories { get; set; }
-		public IList<SelectListItem> AvailableManufacturers { get; set; }
-		public IList<SelectListItem> AvailableStores { get; set; }
-		public IList<SelectListItem> AvailableProductTypes { get; set; }
-
 		#endregion
 
 		public class SearchResultModel : EntityModelBase
@@ -55,6 +47,7 @@ namespace SmartStore.Web.Models.Entity
 			public string SummaryTitle { get; set; }
 			public bool? Published { get; set; }
 			public bool Disable { get; set; }
+			public bool Selected { get; set; }
 			public string ImageUrl { get; set; }
 			public string LabelText { get; set; }
 			public string LabelClassName { get; set; }

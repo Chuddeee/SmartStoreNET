@@ -8,6 +8,7 @@ namespace SmartStore.Data.Migrations
 	using SmartStore.Utilities;
 	using SmartStore.Core.Domain.Media;
 	using Core.Domain.Configuration;
+	using SmartStore.Core.Domain.Customers;
 
 	public sealed class MigrationsConfiguration : DbMigrationsConfiguration<SmartObjectContext>
 	{
@@ -27,6 +28,8 @@ namespace SmartStore.Data.Migrations
 		{
 			context.MigrateLocaleResources(MigrateLocaleResources);
 			MigrateSettings(context);
+
+			context.SaveChanges();
         }
 
 		public void MigrateSettings(SmartObjectContext context)
@@ -37,6 +40,22 @@ namespace SmartStore.Data.Migrations
 			if (setting != null && setting.Value.Convert<int>() < 2048)
 			{
 				setting.Value = "2048";
+			}
+
+			// Change MediaSettings.AvatarPictureSize to 250
+			name = TypeHelper.NameOf<MediaSettings>(y => y.AvatarPictureSize, true);
+			setting = context.Set<Setting>().FirstOrDefault(x => x.Name == name);
+			if (setting != null && setting.Value.Convert<int>() < 250)
+			{
+				setting.Value = "250";
+			}
+
+			// Change MediaSettings.AvatarMaximumSizeBytes to 512000 (500 KB)
+			name = TypeHelper.NameOf<CustomerSettings>(y => y.AvatarMaximumSizeBytes, true);
+			setting = context.Set<Setting>().FirstOrDefault(x => x.Name == name);
+			if (setting != null && setting.Value.Convert<int>() < 512000)
+			{
+				setting.Value = "512000";
 			}
 		}
 
@@ -154,11 +173,14 @@ namespace SmartStore.Data.Migrations
 
 			builder.AddOrUpdate("Admin.DataExchange.Import.FolderName", "Folder path", "Ordnerpfad");
 
-			builder.AddOrUpdate("Admin.MessageTemplate.Preview.More", "More", "Mehr");
-			builder.AddOrUpdate("Admin.MessageTemplate.Preview.Less", "Less", "Weniger");
-			builder.AddOrUpdate("Admin.MessageTemplate.PreviewHeader.To", "To", "An");
-			builder.AddOrUpdate("Admin.MessageTemplate.PreviewHeader.ReplyTo", "From", "Von");
-			builder.AddOrUpdate("Admin.MessageTemplate.PreviewHeader.Subject", "Subject", "Betreff");
+			builder.AddOrUpdate("Admin.MessageTemplate.Preview.From", "From", "Von");
+			builder.AddOrUpdate("Admin.MessageTemplate.Preview.To", "To", "An");
+			builder.AddOrUpdate("Admin.MessageTemplate.Preview.ReplyTo", "Reply To", "Antwort an");
+			builder.AddOrUpdate("Admin.MessageTemplate.Preview.SendTestMail", "Test-E-mail to...", "Test E-Mail an...");
+			builder.AddOrUpdate("Admin.MessageTemplate.Preview.TestMailSent", "E-mail has been sent.", "E-Mail gesendet.");
+			builder.AddOrUpdate("Admin.MessageTemplate.Preview.NoBody",
+				"The generated preview file seems to have expired. Please reload the page.", 
+				"Die generierte Vorschaudatei scheint abgelaufen zu sein. Laden Sie die Seite bitte neu.");
 
 			builder.AddOrUpdate("Admin.ContentManagement.MessageTemplates.Preview.SuccessfullySent",
 				"The email has been sent successfully.", 
@@ -168,6 +190,82 @@ namespace SmartStore.Data.Migrations
 				"The message template has been copied successfully.",
 				"Die Nachrichtenvorlage wurde erfolgreich kopiert.");
 			
+
+			builder.AddOrUpdate("Enums.SmartStore.Core.Domain.DataExchange.ExportEntityType.ShoppingCartItem", "Shopping Cart", "Warenkorb");
+			builder.AddOrUpdate("Enums.SmartStore.Core.Domain.Orders.ShoppingCartType.ShoppingCart", "Shopping Cart", "Warenkorb");
+			builder.AddOrUpdate("Enums.SmartStore.Core.Domain.Orders.ShoppingCartType.Wishlist", "Wishlist", "Wunschliste");
+
+			builder.AddOrUpdate("Admin.DataExchange.Export.Projection.NoBundleProducts",
+				"Do not export bundled products",
+				"Keine Produkt-Bundle exportieren",
+				"Specifies whether to export bundled products. If this option is activated, then the associated bundle items will be exported.",
+				"Legt fest, ob Produkt-Bundle exportiert werden sollen. Ist diese Option aktiviert, so werden die zum Bundle gehörenden Produkte (Bundle-Bestandteile) exportiert.");
+
+			builder.AddOrUpdate("Admin.DataExchange.Export.Filter.ShoppingCartTypeId",
+				"Shopping cart type",
+				"Warenkorbtyp",
+				"Filter by shopping cart type.",
+				"Nach Warenkorbtyp filtern.");
+
+			builder.AddOrUpdate("Common.CustomerId", "Customer ID", "Kunden ID");
+
+			builder.AddOrUpdate("Account.AccountActivation.InvalidEmailOrToken",
+				"Unknown email or token. Please register again.",
+				"Unbekannte E-Mail oder Token. Bitte führen Sie die Registrierung erneut durch.");
+
+			builder.AddOrUpdate("Account.PasswordRecoveryConfirm.InvalidEmailOrToken",
+				"Unknown email or token. Please click \"Forgot password\" again, if you want to renew your password.",
+				"Unbekannte E-Mail oder Token. Klicken Sie bitte erneut \"Passwort vergessen\", falls Sie Ihr Passwort erneuern möchten.");
+
+			builder.Delete("Account.PasswordRecoveryConfirm.InvalidEmail");
+			builder.Delete("Account.PasswordRecoveryConfirm.InvalidToken");
+
+			builder.AddOrUpdate("Admin.Common.Acl.SubjectTo",
+				"Restrict access",
+				"Zugriff einschränken",
+				"Determines whether this entity is subject to access restrictions (no = no restriction, yes = accessible only for selected customer groups)",
+				"Legt fest, ob dieser Datensatz Zugriffsbeschränkungen unterliegt (Nein = keine Beschränkung, Ja = zugänglich nur für gewählte Kundengruppen)");
+
+			builder.AddOrUpdate("Admin.Common.Acl.AvailableFor",
+				"Customer roles",
+				"Kundengruppen",
+				"Select customer roles who can access the entity. For all inactive roles, this record is hidden.",
+				"Wählen Sie Kundengruppen, die auf den Datensatz zugreifen können. Bei allen nicht aktivierten Gruppen wird dieser Datensatz ausgeblendet.");
+
+			builder.Delete(
+				"Admin.Catalog.Categories.Fields.SubjectToAcl",
+				"Admin.Catalog.Categories.Fields.AclCustomerRoles",
+				"Admin.Catalog.Products.Fields.SubjectToAcl",
+				"Admin.Catalog.Products.Fields.AclCustomerRoles");
+
+			builder.AddOrUpdate("Admin.Common.ApplyFilter", "Apply filter", "Filter anwenden");
+			builder.AddOrUpdate("Time.Milliseconds", "Milliseconds", "Millisekunden");
+			builder.AddOrUpdate("Common.Pixel", "Pixel", "Pixel");
+			builder.AddOrUpdate("Admin.DataExchange.Export.Deployment.ShowPlaceholder", "Show placeholder", "Zeige Platzhalter");
+			builder.AddOrUpdate("Admin.DataExchange.Export.Deployment.HidePlaceholder", "Hide placeholder", "Verberge Platzhalter");
+			builder.AddOrUpdate("Admin.DataExchange.Export.Deployment.UpdateExampleFileName", "Update example", "Aktualisiere Beispiel");
+
+			builder.AddOrUpdate("Admin.Configuration.Themes.AvailableDesktopThemes", "Installed themes", "Installierte Themes");
+
+			builder.AddOrUpdate("Admin.Catalog.Products.List.GoDirectlyToSku", "Find by SKU", "Nach SKU suchen");
+
+			builder.AddOrUpdate("Admin.Configuration.Settings.CustomerUser.StoreLastIpAddress",
+				"Store IP address",
+				"IP-Adresse speichern",
+				"Specifies whether to store the IP address in the customer data set.",
+				"Legt fest, ob die IP-Adresse im Kundendatensatz gespeichert werden soll.");
+
+			builder.AddOrUpdate("Admin.Orders.Info", "General", "Allgemein");
+			builder.AddOrUpdate("Admin.Orders.BillingAndShipment", "Billing & Shipping", "Rechnung & Versand");
+			builder.AddOrUpdate("Admin.Orders.Fields.ShippingAddress.ViewOnGoogleMaps", "View on Google Maps", "Auf Google Maps ansehen");
+
+			builder.AddOrUpdate("Admin.Configuration.Settings.GeneralCommon.SocialSettings.InstagramLink",
+				"Instagram Link",
+				"Instagram Link",
+				"Leave this field empty if the Instagram link should not be shown",
+				"Lassen Sie dieses Feld leer, wenn der Instagram Link nicht angezeigt werden soll");
+
+			builder.AddOrUpdate("Common.License", "License", "Lizenz");
 		}
 	}
 }

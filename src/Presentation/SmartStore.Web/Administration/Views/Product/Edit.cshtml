@@ -16,23 +16,24 @@
         <div class="options">
 			@{ Html.RenderWidget("admin_button_toolbar_before"); }
 
-			<button type="submit" name="preview" value="preview" onclick="javascript:openWindow('@Model.ProductUrl', 1000, 600, true); return false;" class="btn">
+			<button type="submit" name="preview" value="preview" onclick="javascript:openWindow('@Model.ProductUrl', 1000, 600, true); return false;" class="btn btn-secondary">
                 <i class="fa fa-eye"></i>
-                @T("Admin.Common.Preview")
+                <span>@T("Admin.Common.Preview")</span>
             </button>
-			<button type="submit" value="save" class="btn btn-primary entity-commit-trigger" data-commit-type="product" data-commit-action="update" data-commit-id="@Model.Id">
+			<button type="submit" value="save" class="btn btn-warning entity-commit-trigger" data-commit-type="product" data-commit-action="update" data-commit-id="@Model.Id">
 				<i class="fa fa-check"></i>
-				@T("Admin.Common.Save")
+				<span>@T("Admin.Common.Save")</span>
 			</button>
-			<button type="submit" value="save-continue" class="btn entity-commit-trigger" data-commit-type="product" data-commit-action="update" data-commit-id="@Model.Id">
+			<button type="submit" value="save-continue" class="btn btn-secondary entity-commit-trigger" data-commit-type="product" data-commit-action="update" data-commit-id="@Model.Id">
 				@T("Admin.Common.SaveContinue")
 			</button>
-			<a href="#copyproduct-window" data-toggle="modal" class="btn">
-				<i class="fa fa-files-o"></i>&nbsp;@T("Admin.Catalog.Products.Copy")
+			<a href="#copyproduct-window" data-toggle="modal" class="btn btn-secondary">
+				<i class="fa fa-files-o"></i>
+				<span>@T("Admin.Catalog.Products.Copy")</span>
 			</a>
 			<button type="submit" id="product-delete" class="btn btn-danger">
 				<i class="fa fa-trash-o"></i>
-				@T("Admin.Common.Delete")
+				<span>@T("Admin.Common.Delete")</span>
 			</button>
 
 			@{ Html.RenderWidget("admin_button_toolbar_after"); }
@@ -46,60 +47,53 @@
 @*copy product form*@
 @{Html.SmartStore().Window()
 		.Name("copyproduct-window")
-		.Title(T("Admin.Catalog.Products.Copy").Text)
+		.Title(T("Admin.Catalog.Products.Copy"))
+		.Size(WindowSize.Large)
 		.Content(@<text>
-    @using (Html.BeginForm("CopyProduct", "Product", FormMethod.Post, new { style = "margin:0;" }))
-    {
-        @Html.HiddenFor(model => Model.CopyProductModel.Id)
-
-		<div class="dialog-content-container">
-			<table class="adminContent">
-                <tr>
-                    <td class="adminTitle">
-                        @Html.SmartLabelFor(model => model.CopyProductModel.NumberOfCopies)
-                    </td>
-                    <td class="adminData">
-                        @Html.EditorFor(model => Model.CopyProductModel.NumberOfCopies, new { small = true })
-                    </td>
-                </tr>
-			    <tr>
-				    <td class="adminTitle">
-					    @Html.SmartLabelFor(model => model.CopyProductModel.Name)
-				    </td>
-				    <td class="adminData">
-					    @Html.EditorFor(model => Model.CopyProductModel.Name)
-				    </td>
-			    </tr>
-			    <tr>
-				    <td class="adminTitle">
-					    @Html.SmartLabelFor(model => model.CopyProductModel.Published)
-				    </td>
-				    <td class="adminData">
-					    @Html.EditorFor(model => Model.CopyProductModel.Published)
-				    </td>
-			    </tr>
-			    <tr>
-				    <td class="adminTitle">
-					    @Html.SmartLabelFor(model => model.CopyProductModel.CopyImages)
-				    </td>
-				    <td class="adminData">
-					    @Html.EditorFor(model => Model.CopyProductModel.CopyImages)
-				    </td>
-			    </tr>
-			</table>
-		</div>
-    }
-    </text>)
-    .FooterContent(@<text>
-        <button id="copyproduct" type="button" class="btn btn-primary">
-            <i class="fa fa-files-o"></i>
-            @T("Admin.Catalog.Products.Copy")
-        </button>
-    </text>)
-		.Width(500)
-        .Height(500)
-		.Modal(true)
-		.Visible(false)
+			<form method="POST" action="@Url.Action("CopyProduct", "Product")">
+				@Html.HiddenFor(model => Model.CopyProductModel.Id)
+				<table class="adminContent">
+					<tr>
+						<td class="adminTitle">
+							@Html.SmartLabelFor(model => model.CopyProductModel.NumberOfCopies)
+						</td>
+						<td class="adminData">
+							@Html.EditorFor(model => Model.CopyProductModel.NumberOfCopies)
+						</td>
+					</tr>
+					<tr>
+						<td class="adminTitle">
+							@Html.SmartLabelFor(model => model.CopyProductModel.Name)
+						</td>
+						<td class="adminData">
+							@Html.EditorFor(model => Model.CopyProductModel.Name)
+						</td>
+					</tr>
+					<tr>
+						<td class="adminTitle">
+							@Html.SmartLabelFor(model => model.CopyProductModel.Published)
+						</td>
+						<td class="adminData">
+							@Html.EditorFor(model => Model.CopyProductModel.Published)
+						</td>
+					</tr>
+					<tr>
+						<td class="adminTitle">
+							@Html.SmartLabelFor(model => model.CopyProductModel.CopyImages)
+						</td>
+						<td class="adminData">
+							@Html.EditorFor(model => Model.CopyProductModel.CopyImages)
+						</td>
+					</tr>
+				</table>
+			</form>
+		</text>)
+	.FooterContent(@<text>
+			<button id="copyproduct" type="button" class="btn btn-primary">
+				<i class="fa fa-files-o"></i>
+				<span>@T("Admin.Catalog.Products.Copy")</span>
+			</button>
+	</text>)
 		.Render();
 }
 <script type="text/javascript">
@@ -153,7 +147,7 @@
         function bundlePerItemPricing(isActive) {
         	$('#TierPriceContainer').toggle(!isActive);
         	$('#group-prices').find('.base-price').toggle(!isActive);
-        	$('a[href=#tab-discounts]').parent().toggle(!isActive);
+        	$('a[href="#tab-discounts"]').parent().toggle(!isActive);
         }
 
 		// Bundle per item in shopping cart
@@ -164,7 +158,7 @@
 		bundlePerItemShoppingCart(@((Model.ProductTypeId == (int)ProductType.BundledProduct && Model.BundlePerItemShoppingCart).ToString().ToLower()));
 
         function bundlePerItemShoppingCart(isActive) {
-        	$('a[href=#tab-inventory]').parent().toggle(!isActive);
+        	$('a[href="#tab-inventory"]').parent().toggle(!isActive);
         }
 
     });

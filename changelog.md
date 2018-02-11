@@ -28,10 +28,15 @@
 * #1117 Added an option to display a dropdown menu for manufacturers 
 * #1203 Added an option to define a maximum number of elements in the main menu for the first hierarchy of the catalog navigation
 * #1100 Customer can register in frontend via "Login with Amazon" button
-* #1292 Web API: Add a method to get an order in PDF format
+* **Web API**:
+	* #1292 Added endpoint to get order in PDF format
+	* Added endpoint to complete an order
+	* #1364 Added endpoints for MeasureWeight and MeasureDimension
 * Added options to include option names of specification and product attributes in the search index
 * #441 added option to specify that additional shipping surcharges are considered only once.
 * #1295 Sales tracking (tracking pixel) for Billiger.de
+* XML and CSV export of shopping cart and wishlist items
+* #1363 Make storing of IP addresses optional
 
 ### Improvements
 * Target .NET Framework changed: 4.5.2 > 4.6.1.
@@ -46,6 +51,7 @@
 * #1285 Copy product: Add option to add more than one copy
 * (Perf) Many improvements in hooking framework
 * #1294 Swiss PostFinance: External payment page too small on mobile devices. Added setting for mobile device template URL, pre-configured with PostFinance template.
+* #1143 Make shipping methods suitable for multi-stores
 
 ### Bugfixes
 * #1268 Data importer always inserts new pictures and does not detect equal pictures while importing
@@ -61,6 +67,10 @@
 * #1330 MegaSearch: Missing variant facets if the variant value is not unique
 * Back-in-stock subscription form was already submitted when opening the popup dialog
 * Associated products of a grouped product were displayed in the wrong order
+* Payment-Filter: Fixed "The cast to value type 'System.Decimal' failed because the materialized value is null"
+* The tax value per tax rate was not updated when adding\removing a product to\from the order.
+* The option to send manually was ignored when sending e-mails
+* #528 LimitedToStores is required on payment provider rather than plugin level
 
 
 ## SmartStore.NET 3.0.3

@@ -117,8 +117,7 @@ namespace SmartStore.Admin.Infrastructure
 
 			//countries
 			CreateMap<CountryModel, Country>()
-				.ForMember(dest => dest.StateProvinces, mo => mo.Ignore())
-				.ForMember(dest => dest.RestrictedShippingMethods, mo => mo.Ignore());
+				.ForMember(dest => dest.StateProvinces, mo => mo.Ignore());
 			CreateMap<Country, CountryModel>()
 				.ForMember(dest => dest.NumberOfStates, mo => mo.MapFrom(src => src.StateProvinces != null ? src.StateProvinces.Count : 0))
 				.ForMember(dest => dest.Locales, mo => mo.Ignore())
@@ -402,8 +401,7 @@ namespace SmartStore.Admin.Infrastructure
 			CreateMap<ShippingMethod, ShippingMethodModel>()
 				.ForMember(dest => dest.Locales, mo => mo.Ignore())
 				.ForMember(dest => dest.FilterConfigurationUrls, mo => mo.Ignore());
-			CreateMap<ShippingMethodModel, ShippingMethod>()
-				.ForMember(dest => dest.RestrictedCountries, mo => mo.Ignore());
+			CreateMap<ShippingMethodModel, ShippingMethod>();
 			//plugins
 			CreateMap<PluginDescriptor, PluginModel>()
 				.ForMember(dest => dest.ConfigurationUrl, mo => mo.Ignore())
@@ -611,9 +609,6 @@ namespace SmartStore.Admin.Infrastructure
 			//Settings
 			CreateMap<TaxSettings, TaxSettingsModel>()
 				.ForMember(dest => dest.DefaultTaxAddress, mo => mo.Ignore())
-				.ForMember(dest => dest.TaxDisplayTypeValues, mo => mo.Ignore())
-				.ForMember(dest => dest.AvailableAuxiliaryServicesTaxTypes, mo => mo.Ignore())
-				.ForMember(dest => dest.TaxBasedOnValues, mo => mo.Ignore())
 				.ForMember(dest => dest.PaymentMethodAdditionalFeeTaxCategories, mo => mo.Ignore())
 				.ForMember(dest => dest.ShippingTaxCategories, mo => mo.Ignore())
 				.ForMember(dest => dest.EuVatShopCountries, mo => mo.Ignore());
@@ -621,8 +616,7 @@ namespace SmartStore.Admin.Infrastructure
 				.ForMember(dest => dest.ActiveTaxProviderSystemName, mo => mo.Ignore());
 			CreateMap<NewsSettings, NewsSettingsModel>();
 			CreateMap<NewsSettingsModel, NewsSettings>();
-			CreateMap<ForumSettings, ForumSettingsModel>()
-				.ForMember(dest => dest.ForumEditorValues, mo => mo.Ignore());
+			CreateMap<ForumSettings, ForumSettingsModel>();
 			CreateMap<ForumSettingsModel, ForumSettings>()
 				.ForMember(dest => dest.TopicSubjectMaxLength, mo => mo.Ignore())
 				.ForMember(dest => dest.StrippedTopicMaxLength, mo => mo.Ignore())
@@ -661,8 +655,7 @@ namespace SmartStore.Admin.Infrastructure
 				.ForMember(dest => dest.AllowCustomersToSelectPageSize, mo => mo.Ignore())
 				.ForMember(dest => dest.MostRecentlyUsedManufacturersMaxSize, mo => mo.Ignore());
 			CreateMap<RewardPointsSettings, RewardPointsSettingsModel>()
-				.ForMember(dest => dest.PrimaryStoreCurrencyCode, mo => mo.Ignore())
-				.ForMember(dest => dest.PointsForPurchases_OverrideForStore, mo => mo.Ignore());
+				.ForMember(dest => dest.PrimaryStoreCurrencyCode, mo => mo.Ignore());
 			CreateMap<RewardPointsSettingsModel, RewardPointsSettings>();
 			CreateMap<OrderSettings, OrderSettingsModel>()
 				.ForMember(dest => dest.GiftCards_Activated_OrderStatuses, mo => mo.Ignore())
@@ -675,7 +668,6 @@ namespace SmartStore.Admin.Infrastructure
 				.ForMember(dest => dest.MinimumOrderPlacementInterval, mo => mo.Ignore())
 				.ForMember(dest => dest.Id, mo => mo.Ignore());
 			CreateMap<ShoppingCartSettings, ShoppingCartSettingsModel>()
-				.ForMember(dest => dest.MiniShoppingCartProductNumber, mo => mo.Ignore())
 				.ForMember(dest => dest.AvailableNewsLetterSubscriptions, mo => mo.Ignore())
 				.ForMember(dest => dest.AvailableThirdPartyEmailHandOver, mo => mo.Ignore())
 				.ForMember(dest => dest.Locales, mo => mo.Ignore());
@@ -693,8 +685,6 @@ namespace SmartStore.Admin.Infrastructure
 				.ForMember(dest => dest.DefaultThumbnailAspectRatio, mo => mo.Ignore())
 				.ForMember(dest => dest.VariantValueThumbPictureSize, mo => mo.Ignore());
 			CreateMap<CustomerSettings, CustomerUserSettingsModel.CustomerSettingsModel>()
-				.ForMember(dest => dest.AvailableCustomerNumberMethods, mo => mo.Ignore())
-				.ForMember(dest => dest.AvailableCustomerNumberVisibilities, mo => mo.Ignore())
 				.ForMember(dest => dest.AvailableRegisterCustomerRoles, mo => mo.Ignore());
 			CreateMap<CustomerUserSettingsModel.CustomerSettingsModel, CustomerSettings>()
 				.ForMember(dest => dest.HashedPasswordFormat, mo => mo.Ignore())

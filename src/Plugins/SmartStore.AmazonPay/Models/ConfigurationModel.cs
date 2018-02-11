@@ -10,6 +10,7 @@ namespace SmartStore.AmazonPay.Models
 	public class ConfigurationModel : ModelBase
 	{
 		public string[] ConfigGroups { get; set; }
+		public string PrimaryStoreCurrencyCode { get; set; }
 
 		[SmartResourceDisplayName("Plugins.Payments.AmazonPay.UseSandbox")]
 		public bool UseSandbox { get; set; }
@@ -43,6 +44,10 @@ namespace SmartStore.AmazonPay.Models
 		[SmartResourceDisplayName("Plugins.Payments.AmazonPay.TransactionType")]
 		public AmazonPayTransactionType TransactionType { get; set; }
 		public List<SelectListItem> TransactionTypes { get; set; }
+
+		[SmartResourceDisplayName("Plugins.Payments.AmazonPay.AuthorizeMethod")]
+		public AmazonPayAuthorizeMethod AuthorizeMethod { get; set; }
+		public SelectList AuthorizeMethods { get; set; }
 
 		[SmartResourceDisplayName("Plugins.Payments.AmazonPay.SaveEmailAndPhone")]
 		public AmazonPaySaveDataType? SaveEmailAndPhone { get; set; }

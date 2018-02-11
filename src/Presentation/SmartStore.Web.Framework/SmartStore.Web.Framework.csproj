@@ -244,6 +244,8 @@
     <Compile Include="Filters\JsonNetAttribute.cs" />
     <Compile Include="FrameworkCacheConsumer.cs" />
     <Compile Include="Localization\SetWorkingCultureAttribute.cs" />
+    <Compile Include="Modelling\IAclSelector.cs" />
+    <Compile Include="Modelling\IStoreSelector.cs" />
     <Compile Include="Modelling\Results\JsonNetResult.cs" />
     <Compile Include="Plugins\PluginRazorHost.cs" />
     <Compile Include="Settings\SaveSettingAttribute.cs" />
@@ -313,6 +315,10 @@
     <Compile Include="UI\Choices\ChoiceItemModel.cs" />
     <Compile Include="UI\Choices\GenericChoiceModel.cs" />
     <Compile Include="UI\Choices\ChoiceModel.cs" />
+    <Compile Include="UI\Components\EntityPicker\EntityPicker.cs" />
+    <Compile Include="UI\Components\EntityPicker\EntityPickerBuilder.cs" />
+    <Compile Include="UI\Components\FileUploader\FileUploaderBuilder.cs" />
+    <Compile Include="UI\Components\FileUploader\FileUploader.cs" />
     <Compile Include="UI\Components\Menu\CatalogMenuProvider.cs" />
     <Compile Include="UI\Components\ViewBasedComponentRenderer.cs" />
     <Compile Include="UI\Components\Menu\AdminMenuProvider.cs" />
@@ -368,7 +374,6 @@
     <Compile Include="Extensions\HtmlExtensions.cs" />
     <Compile Include="Modelling\IModelAttribute.cs" />
     <Compile Include="Localization\ILocalizedModel.cs" />
-    <Compile Include="Localization\ILocalizedModelLocal.cs" />
     <Compile Include="Modelling\DeleteConfirmationModel.cs" />
     <Compile Include="Routing\IRouteProvider.cs" />
     <Compile Include="Routing\IRoutePublisher.cs" />
@@ -395,7 +400,6 @@
     <Compile Include="Theming\ThemeableRazorViewEngine.cs" />
     <Compile Include="Theming\ThemeContext.cs" />
     <Compile Include="UI\Components\Enums.cs" />
-    <Compile Include="UI\Components\Button\Button.cs" />
     <Compile Include="UI\Components\Component.cs" />
     <Compile Include="UI\Components\ComponentBuilder.cs" />
     <Compile Include="UI\Components\ComponentFactory.cs" />

@@ -59,24 +59,23 @@ namespace SmartStore.Web.Controllers
 		public ActionResult Picker(EntityPickerModel model)
 		{
             model.PageSize = 96; // _commonSettings.EntityPickerPageSize;
-			model.AllString = T("Admin.Common.All");
 
-			if (model.Entity.IsCaseInsensitiveEqual("product"))
+			if (model.EntityType.IsCaseInsensitiveEqual("product"))
 			{
-				model.AvailableCategories = _categoryService.GetCategoryTree(includeHidden: true)
+				ViewBag.AvailableCategories = _categoryService.GetCategoryTree(includeHidden: true)
 					.FlattenNodes(false)
 					.Select(x => new SelectListItem { Text = x.GetCategoryNameIndented(), Value = x.Id.ToString() })
 					.ToList();
 
-				model.AvailableManufacturers = _manufacturerService.GetAllManufacturers(true)
+				ViewBag.AvailableManufacturers = _manufacturerService.GetAllManufacturers(true)
 					.Select(x => new SelectListItem { Text = x.Name, Value = x.Id.ToString() })
 					.ToList();
 
-				model.AvailableStores = _services.StoreService.GetAllStores()
+				ViewBag.AvailableStores = _services.StoreService.GetAllStores()
 					.Select(x => new SelectListItem { Text = x.Name, Value = x.Id.ToString() })
 					.ToList();
 
-				model.AvailableProductTypes = ProductType.SimpleProduct.ToSelectList(false).ToList();
+				ViewBag.AvailableProductTypes = ProductType.SimpleProduct.ToSelectList(false).ToList();
 			}
 
 			return PartialView(model);
@@ -86,17 +85,17 @@ namespace SmartStore.Web.Controllers
 		public ActionResult Picker(EntityPickerModel model, FormCollection form)
 		{
             model.PageSize = 96; // _commonSettings.EntityPickerPageSize;
-			model.PublishedString = T("Common.Published");
-			model.UnpublishedString = T("Common.Unpublished");
 
 			try
 			{
 				var disableIf = model.DisableIf.SplitSafe(",").Select(x => x.ToLower().Trim()).ToList();
 				var disableIds = model.DisableIds.SplitSafe(",").Select(x => x.ToInt()).ToList();
 
+				var selIds = new HashSet<int>(model.PreselectedEntityIds.ToIntArray());
+
 				using (var scope = new DbContextScope(_services.DbContext, autoDetectChanges: false, proxyCreation: true, validateOnSave: false, forceNoTracking: true))
 				{
-					if (model.Entity.IsCaseInsensitiveEqual("product"))
+					if (model.EntityType.IsCaseInsensitiveEqual("product"))
 					{
 						#region Product
 
@@ -172,7 +171,8 @@ namespace SmartStore.Web.Controllers
 									Title = x.Name,
 									Summary = x.Sku,
 									SummaryTitle = "{0}: {1}".FormatInvariant(sku, x.Sku.NaIfEmpty()),
-									Published = (hasPermission ? x.Published : (bool?)null)
+									Published = (hasPermission ? x.Published : (bool?)null),
+									Selected = selIds.Contains(x.Id)
 								};
 
 								if (disableIfNotSimpleProduct)
@@ -216,9 +216,9 @@ namespace SmartStore.Web.Controllers
 					}
 				}
 			}
-			catch (Exception exception)
+			catch (Exception ex)
 			{
-				NotifyError(exception.ToAllMessages());
+				NotifyError(ex.ToAllMessages());
 			}
 
 			return PartialView("Picker.List", model);

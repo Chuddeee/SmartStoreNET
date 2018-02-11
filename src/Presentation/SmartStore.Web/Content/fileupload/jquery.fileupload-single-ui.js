@@ -13,7 +13,6 @@
 */
 
 (function ($) {
-
     var parentWidget = ($.blueimpFP || $.blueimp).fileupload;
     $.widget('blueimpUI.fileupload', parentWidget, {
 
@@ -28,9 +27,9 @@
 
         _getProgressInfo: function (data) {
             return _.formatBitrate(data.bitrate) + ' | ' +
-                _.formatTime(
-                    (data.total - data.loaded) * 8 / data.bitrate
-                ) + ' | ' +
+                //_.formatTime(
+                //    (data.total - data.loaded) * 8 / data.bitrate
+                //) + ' | ' +
                 _.formatPercentage(
                     data.loaded / data.total
                 ) + ' | ' +
@@ -135,9 +134,9 @@
             	        // Iframe Transport does not support progress events.
             	        // In lack of an indeterminate progress bar, we set
             	        // the progress to 100%, showing the full animated bar:
-            	        el.find('.progress').addClass(!$.support.transition && 'progress-animated')
+            	        el.find('.progress-bar').addClass(!$.support.transition && 'progress-animated')
 	                       .attr('aria-valuenow', 100)
-	                       .find('.bar').css('width', '100%');
+	                       .css('width', '100%');
             	    }
             	})
             	.on(pre + 'fail.' + ns, function (e, data) {
@@ -152,8 +151,8 @@
 		                function () {
 		                    toggleButtons(false);
 		                    elProgress
-			                	.find('.progress').attr('aria-valuenow', 0)
-			                  	.find(".bar").css("width", "0%");
+			                	.find('.progress-bar').attr('aria-valuenow', 0)
+			                  	.css("width", "0%");
 		                    elProgress
 			                	.find('.progress-extended').html('&nbsp;');
 		                }
@@ -169,9 +168,9 @@
 			        }
 
 			        elProgress
-	                    .find('.progress')
+	                    .find('.progress-bar')
 	                    .attr('aria-valuenow', progress)
-	                    .find('.bar').css('width', progress + '%');
+	                    .css('width', progress + '%');
 			    })
             // cancel button
                 .on('click.' + ns, 'button.cancel', eventData, function (e) {
@@ -229,5 +228,74 @@
             parentWidget.prototype.disable.call(this);
         }
 
-    });
+	});
+
+	// Wrapper & global init
+	$.fn.fileUploadWrapper = function (options) {
+		return this.each(function () {
+			var el = $(this),
+				elRemove = el.find('.remove'),
+				elCancel = el.find('.cancel')
+				elFile = el.find('.fileinput-button'),
+				accept = _.isString(el.data('accept')) ? new RegExp('(\.|\/)(' + el.data('accept') + ')$', 'i') : undefined;
+
+			var opts = {
+				url: el.data('upload-url'),
+				dataType: 'json',
+				acceptFileTypes: accept,
+				pasteZone: null,
+				send: function (e, data) {
+					if (options.onUploading) options.onUploading.apply(this, [e, el, data]);
+				},
+				done: function (e, data) {
+					var result = data.result;
+					if (result.success) {
+
+						if (el.data('show-remove-after-upload')) {
+							elRemove.removeClass("hide");
+						}
+
+						var cnt = el.closest('.fileupload-container');
+						cnt.find('.img-thumbnail').attr('src', data.result.imageUrl);
+						cnt.find('.hidden').val(data.result.pictureId);
+
+						elCancel.addClass("hide");
+						elFile.removeClass("hide");
+
+						if (options.onUploadCompleted) options.onUploadCompleted.apply(this, [e, el, data]);
+					}
+				},
+				error: function (jqXHR, textStatus, errorThrown) {
+					if (errorThrown === 'abort') {
+						if (options.onAborted) options.onAborted.apply(this, el);
+					}
+					else {
+						if (options.onError) options.onError.apply(this, [el, textStatus, errorThrown]);
+					}
+				},
+				always: function (e, data) {
+					if (options.onCompleted) options.onCompleted.apply(this, [e, el, data]);
+				}
+			};
+
+			options = $.extend({}, opts, options)
+
+			el.fileupload(options);
+
+			elRemove.on('click', function (e) {
+				e.preventDefault();
+
+				var cnt = el.closest('.fileupload-container');
+				cnt.find('.img-thumbnail').attr('src', el.data('fallback-url'));
+				cnt.find('.hidden').val(0);
+				$(this).addClass("hide");
+				if (options.onFileRemove) options.onFileRemove.apply(this, [e, el]);
+			});
+
+			// TODO: work out better solution for external buttons
+			$("#add-product-picture").on("click", function () {
+				elRemove.trigger("click");
+			});
+		});
+	};
 })(jQuery);

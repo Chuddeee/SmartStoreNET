@@ -11,7 +11,7 @@
 		MiniShoppingCart,
 
 		/// <summary>
-		/// Amazon payment button clicked
+		/// Amazon Pay button clicked
 		/// </summary>
 		PayButtonHandler,
 
@@ -26,6 +26,13 @@
 		None = 0,
 		Authorize,
 		AuthorizeAndCapture
+	}
+
+	public enum AmazonPayAuthorizeMethod
+	{
+		Omnichronous = 0,
+		Asynchronous,
+		Synchronous
 	}
 
 	public enum AmazonPaySaveDataType
