@@ -1,5 +1,7 @@
-﻿/// <reference path="_variables.scss" />
-/// <reference path="bs4/scss/bootstrap.scss" />
+﻿/// <reference path="../../../Content/shared/_variables-shared.scss" />
+/// <reference path="../../../Content/shared/_mixins.scss" />
+/// <reference path="_variables.scss" />
+/// <reference path="../../../Content/bs4/scss/bootstrap.scss" />
 
 $megamenu-zindex-base:          ($zindex-dropdown - 20);
 $color-layers:                  $megamenu-bg $header-bg $site-bg $body-bg;
@@ -80,8 +82,8 @@ $mixed-megamenu-bg:             $megamenu-bg;
             top: 4px;
             font-size: $font-size-xs;
         }
-        .badge-important { background: $brand-primary; }
-        .badge-inverse { background: $brand-danger; }
+        .badge-important { background: $primary; }
+        .badge-inverse { background: $danger; }
 
         &:before, &:after { content: ""; }
 
@@ -199,6 +201,10 @@ $mixed-megamenu-bg:             $megamenu-bg;
 
 .megamenu-container {
     position: relative;
+
+	.show .mega-menu-dropdown {
+		display: block;
+	}
 
     .nav-link {
         padding: 1em .6em;
@@ -344,8 +350,8 @@ $mixed-megamenu-bg:             $megamenu-bg;
     line-height: 1.125rem;
 }
 .brand-menu-footer {
-    background: $gray-lightest;
-    border-top: 1px solid $gray-lighter;
+    background: $gray-100;
+    border-top: 1px solid $gray-300;
     border-radius: 0 0 $border-radius $border-radius;
 }
 .brand-menu-footer-thumb-col {

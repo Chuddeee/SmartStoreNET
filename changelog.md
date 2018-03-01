@@ -22,6 +22,7 @@
 
 ### New Features
 * 1203 MegaMenu shrinker and *Brands* virtual menu item
+* [Summernote](https://summernote.org/) is now the primary HTML editor
 * #431 Added option to randomize the display order for slides on each request
 * #1258 Add option to filter shipping and payment methods by a specific customer role
 * #1247 Allow to import non system customer roles in customer import
@@ -37,6 +38,9 @@
 * #1295 Sales tracking (tracking pixel) for Billiger.de
 * XML and CSV export of shopping cart and wishlist items
 * #1363 Make storing of IP addresses optional
+* #729 Option for automatic order amount capturing when the shipping status changed to "shipped"
+* (Dev) ILocalizationFileResolver: responsible for finding localization files for client scripts
+* #998 GMC: Find a way to map attribute combination values to feed export values
 
 ### Improvements
 * Target .NET Framework changed: 4.5.2 > 4.6.1.
@@ -52,6 +56,8 @@
 * (Perf) Many improvements in hooking framework
 * #1294 Swiss PostFinance: External payment page too small on mobile devices. Added setting for mobile device template URL, pre-configured with PostFinance template.
 * #1143 Make shipping methods suitable for multi-stores
+* #1320 Image import: Find out the content type of image URLs by response header rather than file extension (which is sometimes missing)
+* #1219 Recently viewed products list should respect setting to hide manufacturer names
 
 ### Bugfixes
 * #1268 Data importer always inserts new pictures and does not detect equal pictures while importing
@@ -71,6 +77,7 @@
 * The tax value per tax rate was not updated when adding\removing a product to\from the order.
 * The option to send manually was ignored when sending e-mails
 * #528 LimitedToStores is required on payment provider rather than plugin level
+* #1318 Disabled preselected attribute combination permanently hides the shopping cart button, even if another combination is selected.
 
 
 ## SmartStore.NET 3.0.3

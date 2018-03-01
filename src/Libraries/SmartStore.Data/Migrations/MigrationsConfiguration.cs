@@ -103,8 +103,8 @@ namespace SmartStore.Data.Migrations
                 "Bei der Suche nach weiteren verfügbaren Sprachen trat ein Fehler auf.");
 
             builder.AddOrUpdate("Admin.Configuration.Languages.NoAvailableLanguagesFound",
-				"There were no other available languages found for version {0}. On <a href='http://translate.smartstore.com/'>translate.smartstore.com</a> you will find more details about available resources.",
-				"Es wurden keine weiteren verfügbaren Sprachen für Version {0} gefunden. Auf <a href='http://translate.smartstore.com/'>translate.smartstore.com</a> finden Sie weitere Details zu verfügbaren Ressourcen.");
+				"There were no other available languages found for version {0}. On <a href='http://translate.smartstore.com/' target='_blank'>translate.smartstore.com</a> you will find more details about available resources.",
+				"Es wurden keine weiteren verfügbaren Sprachen für Version {0} gefunden. Auf <a href='http://translate.smartstore.com/ target='_blank''>translate.smartstore.com</a> finden Sie weitere Details zu verfügbaren Ressourcen.");
 
             builder.AddOrUpdate("Admin.Configuration.Languages.InstalledLanguages",
                 "Installed Languages",
@@ -114,8 +114,8 @@ namespace SmartStore.Data.Migrations
                 "Verfügbare Sprachen");
 
             builder.AddOrUpdate("Admin.Configuration.Languages.AvailableLanguages.Note",
-				"Click <b>Download</b> to install a new language including all localized resources. On <a href='http://translate.smartstore.com/'>translate.smartstore.com</a> you will find more details about available resources.",
-				"Klicken Sie auf <b>Download</b>, um eine neue Sprache mit allen lokalisierten Ressourcen zu installieren. Auf <a href='http://translate.smartstore.com/'>translate.smartstore.com</a> finden Sie weitere Details zu verfügbaren Ressourcen.");
+				"Click <b>Download</b> to install a new language including all localized resources. On <a href='http://translate.smartstore.com/' target='_blank'>translate.smartstore.com</a> you will find more details about available resources.",
+				"Klicken Sie auf <b>Download</b>, um eine neue Sprache mit allen lokalisierten Ressourcen zu installieren. Auf <a href='http://translate.smartstore.com/' target='_blank'>translate.smartstore.com</a> finden Sie weitere Details zu verfügbaren Ressourcen.");
 
             builder.AddOrUpdate("Common.Translated",
                 "Translated",
@@ -236,7 +236,8 @@ namespace SmartStore.Data.Migrations
 				"Admin.Catalog.Categories.Fields.SubjectToAcl",
 				"Admin.Catalog.Categories.Fields.AclCustomerRoles",
 				"Admin.Catalog.Products.Fields.SubjectToAcl",
-				"Admin.Catalog.Products.Fields.AclCustomerRoles");
+				"Admin.Catalog.Products.Fields.AclCustomerRoles",
+				"Common.Options.Count");
 
 			builder.AddOrUpdate("Admin.Common.ApplyFilter", "Apply filter", "Filter anwenden");
 			builder.AddOrUpdate("Time.Milliseconds", "Milliseconds", "Millisekunden");
@@ -248,7 +249,8 @@ namespace SmartStore.Data.Migrations
 			builder.AddOrUpdate("Admin.Configuration.Themes.AvailableDesktopThemes", "Installed themes", "Installierte Themes");
 
 			builder.AddOrUpdate("Admin.Catalog.Products.List.GoDirectlyToSku", "Find by SKU", "Nach SKU suchen");
-
+			builder.AddOrUpdate("Admin.Orders.List.GoDirectlyToNumber", "Find by order id", "Nach Auftragsnummer suchen");
+			
 			builder.AddOrUpdate("Admin.Configuration.Settings.CustomerUser.StoreLastIpAddress",
 				"Store IP address",
 				"IP-Adresse speichern",
@@ -266,6 +268,68 @@ namespace SmartStore.Data.Migrations
 				"Lassen Sie dieses Feld leer, wenn der Instagram Link nicht angezeigt werden soll");
 
 			builder.AddOrUpdate("Common.License", "License", "Lizenz");
+
+			builder.AddOrUpdate("Enums.SmartStore.Core.Domain.Payments.CapturePaymentReason.OrderShipped",
+				"The order has been marked as shipped",
+				"Der Auftrag wurde als versendet markiert");
+
+			builder.AddOrUpdate("Enums.SmartStore.Core.Domain.Payments.CapturePaymentReason.OrderDelivered",
+				"The order has been marked as delivered",
+				"Der Auftrag wurde als ausgeliefert markiert");
+
+			builder.AddOrUpdate("Admin.Configuration.Settings.Payment.CapturePaymentReason",
+				"Capture payment amount when…",
+				"Zahlungsbetrag einziehen, wenn…",
+				"Specifies the event when the payment amount is automatically captured. The selected payment method must support capturing for this.",
+				"Legt das Ereignis fest, zu dem der Zahlunsgbetrag automatisch eingezogen wird. Die gewählte Zahlart muss hierfür Buchungen unterstützen.");
+			
+
+			#region taken from V22Final, because they were never added yet
+
+			builder.AddOrUpdate("Common.Next",
+				"Next",
+				"Weiter");
+			builder.AddOrUpdate("Admin.Common.BackToConfiguration",
+				"Back to configuration",
+				"Zurück zur Konfiguration");
+			builder.AddOrUpdate("Admin.Common.UploadFileSucceeded",
+				"The file has been successfully uploaded.",
+				"Die Datei wurde erfolgreich hochgeladen.");
+			builder.AddOrUpdate("Admin.Common.UploadFileFailed",
+				"The upload has failed.",
+				"Der Upload ist leider fehlgeschlagen.");
+			builder.AddOrUpdate("Admin.Common.ImportAll",
+				"Import all",
+				"Alle importieren");
+			builder.AddOrUpdate("Admin.Common.ImportSelected",
+				"Import selected",
+				"Ausgewählte importieren");
+			builder.AddOrUpdate("Admin.Common.UnknownError",
+				"An unknown error has occurred.",
+				"Es ist ein unbekannter Fehler aufgetreten.");
+			builder.AddOrUpdate("Plugins.Feed.FreeShippingThreshold",
+				"Free shipping threshold",
+				"Kostenloser Versand ab",
+				"Amount as from shipping is free.",
+				"Betrag, ab dem keine Versandkosten anfallen.");
+
+			#endregion
+
+			builder.AddOrUpdate("Admin.Product.Picture.Added",
+				"The picture has successfully been added",
+				"Das Bild wurde erfolgreich zugefügt");
+
+			builder.AddOrUpdate("HtmlEditor.ClickToEdit", "Click to edit HTML...", "Hier klicken, um HTML zu editieren...");
+
+			builder.AddOrUpdate("Admin.Catalog.Attributes.ProductAttributes.Fields.ExportMappings.Note",
+				"Define mappings of attribute values to export fields according to the pattern <b>&lt;Format prefix&gt;:&lt;Export field name&gt;</b>. Example: <b>gmc:color</b> exports the attribute values for colors to the field <b>color</b> during the Google Merchant Center Export. The mappings are only effective when exporting attribute combinations.",
+				"Legen Sie Zuordnungen von Attributwerten zu Exportfeldern nach dem Muster <b>&lt;Formatpräfix&gt;:&lt;Export-Feldname&gt;</b> fest. Beispiel: <b>gmc:color</b> exportiert beim Google Merchant Center Export die Attributwerte für Farben in das Feld <b>color</b>. Die Zuordnungen sind nur beim Export von Attributkombinationen wirksam.");
+
+			builder.AddOrUpdate("Admin.Catalog.Attributes.ProductAttributes.Fields.ExportMappings",
+				"Mappings to export fields",
+				"Zuordnungen zu Exportfeldern",
+				"Allows to map attribute values to export fields. Each entry has to be entered in a new line.",
+				"Ermöglicht die Zuordnung von Attributwerten zu Exportfeldern. Jeder Eintrag muss in einer neuen Zeile erfolgen.");
 		}
 	}
 }

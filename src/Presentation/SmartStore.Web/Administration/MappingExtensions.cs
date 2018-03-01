@@ -42,6 +42,7 @@ using SmartStore.Services.Shipping;
 using SmartStore.Services.Tax;
 using SmartStore.Core.Domain.Themes;
 using SmartStore.Services.Common;
+using SmartStore.Core.Domain.Payments;
 
 namespace SmartStore.Admin
 {
@@ -914,7 +915,8 @@ namespace SmartStore.Admin
         }
 
 
-        public static MediaSettingsModel ToModel(this MediaSettings entity)
+
+		public static MediaSettingsModel ToModel(this MediaSettings entity)
         {
             return Mapper.Map<MediaSettings, MediaSettingsModel>(entity);
         }

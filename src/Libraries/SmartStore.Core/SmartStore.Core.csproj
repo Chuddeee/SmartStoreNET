@@ -234,6 +234,7 @@
     <Compile Include="Domain\Messages\MessageTemplateNames.cs" />
     <Compile Include="Domain\Messages\QueuedEmailAttachment.cs" />
     <Compile Include="Domain\Orders\CheckoutEnums.cs" />
+    <Compile Include="Domain\Payments\CapturePaymentReason.cs" />
     <Compile Include="Domain\Payments\PaymentMethod.cs" />
     <Compile Include="Domain\Seo\CanonicalHostNameRule.cs" />
     <Compile Include="Domain\Tax\AuxiliaryServicesTaxType.cs" />
@@ -254,6 +255,7 @@
     <Compile Include="Infrastructure\DependencyManagement\Work.cs" />
     <Compile Include="Infrastructure\ApplicationEnvironment.cs" />
     <Compile Include="Infrastructure\IApplicationEnvironment.cs" />
+    <Compile Include="IO\ImageHeader.cs" />
     <Compile Include="IO\VirtualPath\DefaultVirtualPathProvider.cs" />
     <Compile Include="IO\VirtualPath\IVirtualFolder.cs" />
     <Compile Include="IO\VirtualPath\IVirtualPathProvider.cs" />
@@ -266,6 +268,8 @@
     <Compile Include="IAuditable.cs" />
     <Compile Include="ITransient.cs" />
     <Compile Include="Collections\MostRecentlyUsedList.cs" />
+    <Compile Include="Localization\ILocalizationFileResolver.cs" />
+    <Compile Include="Localization\LocalizationFileResolver.cs" />
     <Compile Include="Localization\LocalizationHelper.cs" />
     <Compile Include="Logging\IChronometer.cs" />
     <Compile Include="Logging\ILoggerFactory.cs" />

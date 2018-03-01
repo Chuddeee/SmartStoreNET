@@ -19,8 +19,6 @@ using SmartStore.Web.Framework.Localization;
 using SmartStore.Web.Framework.Modelling;
 using SmartStore.Web.Framework.Settings;
 using SmartStore.Web.Framework.UI;
-using SmartStore.Web.Framework.Theming;
-using SmartStore.ComponentModel;
 
 namespace SmartStore.Web.Framework
 {
@@ -506,7 +504,8 @@ namespace SmartStore.Web.Framework
 
 			string inputHtml = "";
 			var htmlAttributes = new RouteValueDictionary();
-			var dataTypeName = ModelMetadata.FromLambdaExpression(expression, html.ViewData).DataTypeName.EmptyNull();
+			var metadata = ModelMetadata.FromLambdaExpression(expression, html.ViewData);
+			var dataTypeName = metadata.DataTypeName.EmptyNull();
             var groupClass = "form-group row";
             var labelClass = "col-{0}-3 col-form-label".FormatInvariant(breakpoint.NullEmpty() ?? "md");
             var controlsClass = "col-{0}-9".FormatInvariant(breakpoint.NullEmpty() ?? "md");
@@ -541,9 +540,11 @@ namespace SmartStore.Web.Framework
             switch (editorType)
             {
                 case InputEditorType.Checkbox:
-                    inputHtml = string.Format("<div class='form-check'><label class='form-check-label'>{0} {1}</label></div>",
-                        html.EditorFor(expression).ToString(),
-                        ModelMetadata.FromLambdaExpression(expression, html.ViewData).DisplayName); // TBD: ist das OK so?
+					CommonHelper.TryConvert<bool>(metadata.Model, out var isChecked);
+                    inputHtml = string.Format("<div class='form-check'>{0}<label class='form-check-label' for='{1}'>{2}</label></div>",
+                        html.CheckBox(ExpressionHelper.GetExpressionText(expression), isChecked, new { @class = "form-check-input" }).ToString(),
+						html.IdFor(expression),
+						metadata.DisplayName);
                     break;
                 case InputEditorType.Password:
                     inputHtml = html.PasswordFor(expression, htmlAttributes).ToString();
@@ -586,8 +587,7 @@ namespace SmartStore.Web.Framework
 
             sb.Append("</div>");
 
-			// TODO: (mc) Change location of scripts (make it common), also remove redundant files in ~/Content/bootstrap/js/...
-			var scriptRoot = "~/Administration/Content/vendors/colorpicker/js/";
+			var scriptRoot = "~/Content/vendors/colorpicker/js/";
             html.AppendScriptParts(true,
                 scriptRoot + "bootstrap-colorpicker.js",
                 scriptRoot + "bootstrap-colorpicker-globalinit.js");
@@ -706,18 +706,6 @@ namespace SmartStore.Web.Framework
 			sb.Append("</div></div>");
 
 			return MvcHtmlString.Create(sb.ToString());
-		}
-
-		public static MvcHtmlString SettingOverrideCheckbox<TModel, TValue>(
-			this HtmlHelper<TModel> helper,
-			Expression<Func<TModel, TValue>> expression,
-			string parentSelector = null)
-		{
-			var data = helper.ViewData[StoreDependingSettingHelper.ViewDataKey] as StoreDependingSettingData;
-			if (data == null || data.ActiveStoreScopeConfiguration <= 0)
-				return MvcHtmlString.Empty;
-
-			return helper.SettingOverrideCheckboxInternal(expression, data, parentSelector);
 		}
 
 		private static MvcHtmlString SettingOverrideCheckboxInternal<TModel, TValue>(

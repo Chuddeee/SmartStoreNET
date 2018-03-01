@@ -13,7 +13,7 @@ using SmartStore.Web.Framework.Settings;
 
 namespace SmartStore.FacebookAuth.Controllers
 {
-    //[UnitOfWork]
+	//[UnitOfWork]
 	public class ExternalAuthFacebookController : PluginControllerBase
     {
         private readonly IOAuthProviderFacebookAuthorizer _oAuthProviderFacebookAuthorizer;
@@ -35,7 +35,7 @@ namespace SmartStore.FacebookAuth.Controllers
 
 		private bool HasPermission(bool notify = true)
 		{
-			bool hasPermission = _services.Permissions.Authorize(StandardPermissionProvider.ManageExternalAuthenticationMethods);
+			var hasPermission = _services.Permissions.Authorize(StandardPermissionProvider.ManageExternalAuthenticationMethods);
 
 			if (notify && !hasPermission)
 				NotifyError(_services.Localization.GetResource("Admin.AccessDenied.Description"));
@@ -51,7 +51,11 @@ namespace SmartStore.FacebookAuth.Controllers
 
             var model = new ConfigurationModel();
 			MiniMapper.Map(settings, model);
-            return View(model);
+
+			var host = _services.StoreContext.CurrentStore.GetHost(true);
+			model.RedirectUrl = $"{host}Plugins/SmartStore.FacebookAuth/logincallback/";
+
+			return View(model);
         }
 
 		[SaveSetting, HttpPost, AdminAuthorize, ChildActionOnly]
@@ -66,7 +70,7 @@ namespace SmartStore.FacebookAuth.Controllers
 			MiniMapper.Map(model, settings);
 			NotifySuccess(_services.Localization.GetResource("Admin.Common.DataSuccessfullySaved"));
 
-			return Configure(settings);
+			return RedirectToConfiguration(FacebookExternalAuthMethod.SystemName, true);
         }
 
         [ChildActionOnly]
@@ -93,7 +97,7 @@ namespace SmartStore.FacebookAuth.Controllers
 		[NonAction]
 		private ActionResult LoginInternal(string returnUrl, bool verifyResponse)
 		{
-			var processor = _openAuthenticationService.LoadExternalAuthenticationMethodBySystemName(Provider.SystemName, _services.StoreContext.CurrentStore.Id);
+			var processor = _openAuthenticationService.LoadExternalAuthenticationMethodBySystemName(FacebookExternalAuthMethod.SystemName, _services.StoreContext.CurrentStore.Id);
 			if (processor == null || !processor.IsMethodActive(_externalAuthenticationSettings))
 			{
 				throw new SmartException("Facebook module cannot be loaded");
@@ -108,8 +112,9 @@ namespace SmartStore.FacebookAuth.Controllers
 				case OpenAuthenticationStatus.Error:
 					{
 						if (!result.Success)
-							foreach (var error in result.Errors)
-								NotifyError(error);
+						{
+							result.Errors.Each(x => NotifyError(x));
+						}
 
 						return new RedirectResult(Url.LogOn(returnUrl));
 					}

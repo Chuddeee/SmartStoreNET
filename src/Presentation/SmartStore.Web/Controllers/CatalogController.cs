@@ -647,7 +647,7 @@ namespace SmartStore.Web.Controllers
 
 			var settings = _helper.GetBestFitProductSummaryMappingSettings(ProductSummaryViewMode.Mini, x => 
 			{
-				x.MapManufacturers = true;
+				x.MapManufacturers = _catalogSettings.ShowManufacturerInGridStyleLists;
 			});
 
 			var model = _helper.MapProductSummaryModel(products, settings);
@@ -930,13 +930,23 @@ namespace SmartStore.Web.Controllers
         public ActionResult OffCanvasMenu()
         {
             ViewBag.ShowManufacturers = false;
+			ViewBag.ShowCategories = false;
 
-            if(_catalogSettings.ShowManufacturersInOffCanvas == true && _catalogSettings.ManufacturerItemsToDisplayInOffcanvasMenu > 0)
+			if (
+				_catalogSettings.ShowManufacturersInOffCanvas == true && 
+				_catalogSettings.ManufacturerItemsToDisplayInOffcanvasMenu > 0 &&
+				_services.Permissions.Authorize(StandardPermissionProvider.PublicStoreAllowNavigation)
+			)
             {
                 ViewBag.ShowManufacturers = true;
             }
-            
-            return PartialView();
+
+			if(_services.Permissions.Authorize(StandardPermissionProvider.PublicStoreAllowNavigation))
+			{
+				ViewBag.ShowCategories = true;
+			}
+			
+			return PartialView();
         }
         
         #endregion

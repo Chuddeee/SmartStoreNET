@@ -37,8 +37,8 @@
 				return !$(this).parent().hasClass("t-group-indicator");
 			}));
 
-			// skin telerik grids with bootstrap table
-			ctx.find(".t-grid > table").addClass("table");
+			//// skin telerik grids with bootstrap table (obsolete: styled per Sass @extend now)
+			//ctx.find(".t-grid > table").addClass("table");
 		},
 		// btn-trigger
 		function (ctx) {
@@ -66,7 +66,6 @@
 	};
 
     $(document).ready(function () {
-
         var html = $("html");
 
         html.removeClass("not-ready").addClass("ready");
@@ -112,7 +111,11 @@
                     id: el.data('commit-id')
                 });
             }
-        });
+		});
+
+		// Because we restyled the grid, the filter dropdown does not position
+		// correctly anymore. We have to reposition it.
+		Hacks.Telerik.handleGridFilter();
 
         // sticky section-header
         var navbar = $("#navbar");

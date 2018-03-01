@@ -1,19 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Net;
 using System.Web.Mvc;
 using SmartStore.ComponentModel;
-using SmartStore.PayPal.Services;
 using SmartStore.PayPal.Settings;
 using SmartStore.Web.Framework;
 using SmartStore.Web.Framework.Modelling;
 
 namespace SmartStore.PayPal.Models
 {
-	public abstract class ApiConfigurationModel: ModelBase
+	public abstract class ApiConfigurationModel : ModelBase
 	{
         public string[] ConfigGroups { get; set; }
+		public string PrimaryStoreCurrencyCode { get; set; }
 
 		[SmartResourceDisplayName("Plugins.Payments.PayPal.UseSandbox")]
 		public bool UseSandbox { get; set; }
@@ -22,12 +20,7 @@ namespace SmartStore.PayPal.Models
 		public bool IpnChangesPaymentStatus { get; set; }
 
 		[SmartResourceDisplayName("Plugins.Payments.PayPal.TransactMode")]
-		public int TransactMode { get; set; }
-		public SelectList TransactModeValues { get; set; }
-
-		[SmartResourceDisplayName("Plugins.Payments.PayPal.SecurityProtocol")]
-		public SecurityProtocolType? SecurityProtocol { get; set; }
-		public List<SelectListItem> AvailableSecurityProtocols { get; set; }
+		public TransactMode TransactMode { get; set; }
 
 		[SmartResourceDisplayName("Plugins.Payments.PayPal.ApiAccountName")]
 		public string ApiAccountName { get; set; }
@@ -98,6 +91,11 @@ namespace SmartStore.PayPal.Models
 
 	public class PayPalPlusConfigurationModel : ApiConfigurationModel
 	{
+		public PayPalPlusConfigurationModel()
+		{
+			TransactMode = TransactMode.AuthorizeAndCapture;
+		}
+
 		[SmartResourceDisplayName("Plugins.Payments.PayPalPlus.ThirdPartyPaymentMethods")]
 		public List<string> ThirdPartyPaymentMethods { get; set; }
 		public List<SelectListItem> AvailableThirdPartyPaymentMethods { get; set; }
@@ -114,12 +112,10 @@ namespace SmartStore.PayPal.Models
 			if (fromSettings)
 			{
 				MiniMapper.Map(settings, this);
-				TransactMode = (int)Settings.TransactMode.AuthorizeAndCapture;
 			}
 			else
 			{
 				MiniMapper.Map(this, settings);
-				settings.TransactMode = Settings.TransactMode.AuthorizeAndCapture;
 			}
 		}
 	}
