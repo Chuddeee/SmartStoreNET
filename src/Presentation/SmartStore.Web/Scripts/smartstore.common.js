@@ -238,6 +238,42 @@
 	    return spinner;
 	}
 
+	window.copyTextToClipboard = function (text) {
+		var result = false;
+
+		if (window.clipboardData && window.clipboardData.setData) {
+			result = clipboardData.setData('Text', text);
+		}
+		else if (document.queryCommandSupported && document.queryCommandSupported('copy')) {
+			var textarea = document.createElement('textarea'),
+				elFocus = document.activeElement,
+				elContext = elFocus || document.body;
+
+			textarea.textContent = text;
+			textarea.style.position = 'fixed';
+			textarea.style.width = '10px';
+			textarea.style.height = '10px';
+
+			elContext.appendChild(textarea);
+
+			textarea.focus();
+			textarea.setSelectionRange(0, textarea.value.length);
+
+			try {
+				result = document.execCommand('copy');
+			}
+			catch (e) {
+			}
+			finally {
+				elContext.removeChild(textarea);
+				if (elFocus) {
+					elFocus.focus();
+				}
+			}
+		}
+		return result;
+	}
+
 	window.getImageSize = function (url, callback) {
 		var img = new Image();
 		img.src = url;
@@ -248,6 +284,7 @@
 
     // on document ready
 	$(function () {
+		var rtl = SmartStore.globalization.culture.isRTL;
 
 		function getFunction(code, argNames) {
 			var fn = window, parts = (code || "").split(".");
@@ -274,13 +311,24 @@
 
 		// Adjust initPNotify global defaults
 		if (typeof PNotify !== 'undefined') {
+			var stack = {
+				"dir1": "down",
+				"dir2": rtl ? "right" : "left",
+				"push": "bottom",
+				"firstpos1": $('html').data('pnotify-firstpos1') || 80,
+				"spacing1": 0, "spacing2": 25, "context": $("body")
+			};
 			PNotify.prototype.options = $.extend(PNotify.prototype.options, {
 				styling: "fontawesome",
-				stack: { "dir1": "down", "dir2": "left", "push": "bottom", "firstpos1": $('html').data('pnotify-firstpos1') || 80, "spacing1": 0, "spacing2": 25, "context": $("body") },
-				addclass: 'stack-topright',
+				stack: stack,
+				addclass: 'stack-top' + (rtl ? 'left' : 'right'),
 				width: "450px",
 				mobile: { swipe_dismiss: true, styling: true },
-				animate: { animate: true, in_class: "fadeInDown", out_class: "fadeOutRight" }
+				animate: {
+					animate: true,
+					in_class: "fadeInDown",
+					out_class: "fadeOut" + (rtl ? 'Left' : 'Right')
+				}
 			});
 		}
 
@@ -536,9 +584,39 @@
 			$('.more-less').moreLess();
 		}
 
+		// state region dropdown
+		$(document).on('change', '.country-selector', function () {
+			var el = $(this);
+			var selectedItem = el.val();
+			var ddlStates = $(el.data("region-control-selector"));
+			var ajaxUrl = el.data("states-ajax-url");
+			var addEmptyStateIfRequired = el.data("addemptystateifrequired");
+			var addAsterisk = el.data("addasterisk");
+				
+			$.ajax({
+				cache: false,
+				type: "GET",
+				url: ajaxUrl,
+				data: { "countryId": selectedItem, "addEmptyStateIfRequired": addEmptyStateIfRequired, "addAsterisk": addAsterisk },
+				success: function (data) {
+					if (data.error)
+						return;
+
+					ddlStates.html('');
+					$.each(data, function (id, option) {
+						ddlStates.append($('<option></option>').val(option.id).html(option.name));
+					});
+					ddlStates.trigger("change");
+				},
+				error: function (xhr, ajaxOptions, thrownError) {
+					alert('Failed to retrieve states.');
+				}
+			});
+		});
+		
 		// scroll top
 		(function () {
-			$('#scroll-top').click(function (e) {
+			$('#scroll-top').on('click', function (e) {
 				e.preventDefault();
 				$(window).scrollTo(0, 600);
 				return false;

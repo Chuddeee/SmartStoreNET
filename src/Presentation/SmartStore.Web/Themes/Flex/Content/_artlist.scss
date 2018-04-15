@@ -75,8 +75,15 @@ $art-border-color:              #ddd;
     margin: 0 -0.25rem;
 }
 
+.artlist-action--filter,
+.artlist-action--sort {
+	flex-grow: 1;
+	flex-basis: 0;
+	max-width: 100%;
+}
+
 .artlist-action--pager {
-    > * { position: relative; display: block; float: left; }
+    > * { position: relative; }
     > *:not(:first-child) { margin-left: -1px; }
     .btn-pager-prev { border-top-left-radius: 3px; border-bottom-left-radius: 3px }   
     .btn-pager-next { border-top-right-radius: 3px; border-bottom-right-radius: 3px }    
@@ -93,7 +100,7 @@ $art-border-color:              #ddd;
     .btn-artlist-action,
     .btn-artlist-action span { font-weight: 400 !important; }
 
-    .artlist-action-group--filtersort {
+    .artlist-action-group {
         .btn { 
             font-size: 1rem; text-align: left; border-radius: $btn-border-radius;
             > b { background: transparent; } 
@@ -106,13 +113,43 @@ $art-border-color:              #ddd;
 }
 
 .artlist-actions--top { 
-    border-bottom: 1px solid $art-border-color; 
     display: flex;
     flex-wrap: wrap;
-    .artlist-action-group { width: 100%; }
+
+    .artlist-action-group { 
+		width: 100%;
+    }
+
+	.artlist-action-group--filtersort {
+		flex: 1 1 0; // grow shrink basis
+		max-width: 100%;
+	}
+
+	.artlist-action-group--page {
+		flex: 0 0 auto; // grow shrink basis
+		width: auto;
+		max-width: none;
+		padding-left: 0.5rem;
+	}
+
+	.artlist-action--pagesize,
+	.artlist-action--pager {
+		display: none !important;
+	}
 
     @include media-breakpoint-up(lg) {
         flex-wrap: nowrap;
+		border-bottom: 1px solid $art-border-color; 
+
+		.artlist-action--pagesize,
+		.artlist-action--pager {
+			display: flex !important;
+		}
+
+		.artlist-action-group--page {
+			padding-left: 0;
+		}
+
         .artlist-action-group { width: auto; }
         .artlist-action-group--page { margin-left: auto; }
     }
@@ -344,8 +381,6 @@ $art-border-color:              #ddd;
 .art-more-opts {
     font-size: $art-font-size-sm;
     color: $text-muted;
-    
-    > a { font-weight: bold; }  
 }
 
 .art-variant-info > * + * {
@@ -359,9 +394,8 @@ $art-border-color:              #ddd;
 
     td { padding: 1px 0; }
     td:first-child { 
-        padding-right: 0.5rem; 
+        padding-right: 0.75rem; 
         font-weight: $font-weight-medium; 
-        //color: $text-muted;
     }
 }
 
@@ -453,10 +487,6 @@ $art-border-color:              #ddd;
         font-size: 1rem;
         color: $text-muted;
         font-weight: 400;
-    }
-
-    .art-oldprice {
-        //display: block;
     }
 
     .art-variant-info {

@@ -717,7 +717,7 @@ namespace SmartStore.Web.Controllers
 
 			if (_shoppingCartSettings.ThirdPartyEmailHandOver != CheckoutThirdPartyEmailHandOver.None)
 			{
-				model.ThirdPartyEmailHandOverLabel = _shoppingCartSettings.GetLocalized(x => x.ThirdPartyEmailHandOverLabel, _workContext.WorkingLanguage.Id, true, false);
+				model.ThirdPartyEmailHandOverLabel = _shoppingCartSettings.GetLocalized(x => x.ThirdPartyEmailHandOverLabel, _workContext.WorkingLanguage, true, false);
 
 				if (model.ThirdPartyEmailHandOverLabel.IsEmpty())
 					model.ThirdPartyEmailHandOverLabel = T("Admin.Configuration.Settings.ShoppingCart.ThirdPartyEmailHandOverLabel.Default");
@@ -1507,7 +1507,7 @@ namespace SmartStore.Web.Controllers
         public ActionResult UploadFileProductAttribute(int productId, int productAttributeId)
         {
             var product = _productService.GetProductById(productId);
-            if (product == null || !product.Published || product.Deleted)
+            if (product == null || !product.Published || product.Deleted || product.IsSystemProduct)
             {
                 return Json(new
                 {
@@ -2098,6 +2098,13 @@ namespace SmartStore.Web.Controllers
                     model.RedeemedRewardPoints = cartTotal.RedeemedRewardPoints;
                     model.RedeemedRewardPointsAmount = _priceFormatter.FormatPrice(-redeemedRewardPointsAmountInCustomerCurrency, true, false);
                 }
+
+				// Credit balance.
+				if (cartTotal.CreditBalance > decimal.Zero)
+				{
+					var convertedCreditBalance = _currencyService.ConvertFromPrimaryStoreCurrency(cartTotal.CreditBalance, currency);
+					model.CreditBalance = _priceFormatter.FormatPrice(-convertedCreditBalance, true, false);
+				}
             }
             
             return PartialView(model);

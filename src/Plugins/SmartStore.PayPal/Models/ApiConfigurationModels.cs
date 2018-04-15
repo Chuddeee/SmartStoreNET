@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Web.Mvc;
 using SmartStore.ComponentModel;
 using SmartStore.PayPal.Settings;
 using SmartStore.Web.Framework;
@@ -44,10 +43,10 @@ namespace SmartStore.PayPal.Models
 		[SmartResourceDisplayName("Plugins.SmartStore.PayPal.WebhookId")]
 		public string WebhookId { get; set; }
 
-		[SmartResourceDisplayName("Plugins.Payments.PayPal.AdditionalFee")]
+		[SmartResourceDisplayName("Admin.Configuration.Payment.Methods.AdditionalFee")]
 		public decimal AdditionalFee { get; set; }
 
-		[SmartResourceDisplayName("Plugins.Payments.PayPal.AdditionalFeePercentage")]
+		[SmartResourceDisplayName("Admin.Configuration.Payment.Methods.AdditionalFeePercentage")]
 		public bool AdditionalFeePercentage { get; set; }
 	}
 
@@ -56,9 +55,20 @@ namespace SmartStore.PayPal.Models
         public void Copy(PayPalDirectPaymentSettings settings, bool fromSettings)
         {
             if (fromSettings)
+			{
 				MiniMapper.Map(settings, this);
-            else
+			}
+			else
+			{
 				MiniMapper.Map(this, settings);
+				settings.ApiAccountName = ApiAccountName.TrimSafe();
+				settings.ApiAccountPassword = ApiAccountPassword.TrimSafe();
+				settings.ClientId = ClientId.TrimSafe();
+				settings.ExperienceProfileId = ExperienceProfileId.TrimSafe();
+				settings.Secret = Secret.TrimSafe();
+				settings.Signature = Signature.TrimSafe();
+				settings.WebhookId = WebhookId.TrimSafe();
+			}
         }
     }
 
@@ -82,9 +92,16 @@ namespace SmartStore.PayPal.Models
         public void Copy(PayPalExpressPaymentSettings settings, bool fromSettings)
         {
             if (fromSettings)
+			{
 				MiniMapper.Map(settings, this);
+			}
             else
+			{
 				MiniMapper.Map(this, settings);
+				settings.ApiAccountName = ApiAccountName.TrimSafe();
+				settings.ApiAccountPassword = ApiAccountPassword.TrimSafe();
+				settings.Signature = Signature.TrimSafe();
+			}
         }
     }
 
@@ -98,7 +115,7 @@ namespace SmartStore.PayPal.Models
 
 		[SmartResourceDisplayName("Plugins.Payments.PayPalPlus.ThirdPartyPaymentMethods")]
 		public List<string> ThirdPartyPaymentMethods { get; set; }
-		public List<SelectListItem> AvailableThirdPartyPaymentMethods { get; set; }
+		public IList<ExtendedSelectListItem> AvailableThirdPartyPaymentMethods { get; set; }
 
 		[SmartResourceDisplayName("Plugins.Payments.PayPalPlus.DisplayPaymentMethodLogo")]
 		public bool DisplayPaymentMethodLogo { get; set; }
@@ -116,6 +133,13 @@ namespace SmartStore.PayPal.Models
 			else
 			{
 				MiniMapper.Map(this, settings);
+				settings.ApiAccountName = ApiAccountName.TrimSafe();
+				settings.ApiAccountPassword = ApiAccountPassword.TrimSafe();
+				settings.ClientId = ClientId.TrimSafe();
+				settings.ExperienceProfileId = ExperienceProfileId.TrimSafe();
+				settings.Secret = Secret.TrimSafe();
+				settings.Signature = Signature.TrimSafe();
+				settings.WebhookId = WebhookId.TrimSafe();
 			}
 		}
 	}

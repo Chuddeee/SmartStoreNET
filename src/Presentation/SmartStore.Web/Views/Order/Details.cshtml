@@ -39,7 +39,7 @@
 		<div class="row mb-3">
 			<div class="col-6 col-sm-auto pb-3">
 				<h5 class="text-muted">@T("Order.OrderDate")</h5>
-				<div>@Model.CreatedOn.ToShortDateString()</div>
+				<div>@Model.CreatedOn.ToShortDateString().ReplaceNativeDigits()</div>
 			</div>
 			<div class="col-6 col-sm-auto pb-3">
 				<h5 class="text-muted">@T("Order.Order#")</h5>
@@ -241,6 +241,13 @@
 										<td class="cart-summary-value">@Model.RedeemedRewardPointsAmount</td>
 									</tr>
 								}
+								@if (Model.CreditBalance.HasValue())
+								{
+									<tr class="cart-summary-credit-balance cart-summary-pos">
+										<td class="cart-summary-label">@T("ShoppingCart.Totals.CreditBalance"):</td>
+										<td class="cart-summary-value">@Model.CreditBalance</td>
+									</tr>
+								}
                                 @if (Model.OrderTotalRounding.HasValue())
                                 {
                                     <tr class="cart-summary-totalrounding cart-summary-pos">
@@ -318,7 +325,7 @@
 									<td>
 										@if (item.ShippedDate.HasValue)
 										{
-											@item.ShippedDate.Value.ToString("D")
+											@item.ShippedDate.Value.ToNativeString("D")
 										}
 										else
 										{
@@ -328,7 +335,7 @@
 									<td>
 										@if (item.DeliveryDate.HasValue)
 										{
-											@item.DeliveryDate.Value.ToString("D")
+											@item.DeliveryDate.Value.ToNativeString("D")
 										}
 										else
 										{

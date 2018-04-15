@@ -30,9 +30,10 @@ namespace SmartStore.Web.Infrastructure
 			-----------------------------------------------------*/
 			bundles.Add(new CustomScriptBundle("~/bundles/summernote").Include(
 				"~/Content/editors/summernote/summernote-bs4.min.js",
-				"~/Content/editors/summernote/plugin/media/smartstore.media.js",
-				"~/Content/editors/summernote/plugin/link/smartstore.link.js",
-				"~/Content/editors/summernote/plugin/image/summernote-image-attributes.js",
+				"~/Content/editors/summernote/plugins/smartstore.image.js",
+				"~/Content/editors/summernote/plugins/smartstore.link.js",
+				"~/Content/editors/summernote/plugins/smartstore.tablestyles.js",
+				"~/Content/editors/summernote/plugins/smartstore.cssclass.js",
 				"~/Content/editors/summernote/globalinit.js"));
 
 			/* CodeMirror (V 5.3.3)
@@ -83,12 +84,6 @@ namespace SmartStore.Web.Infrastructure
 				roxy + "js/jquery-dateFormat.min.js");
 			scriptBundle.Orderer = new NullOrderer();
 			bundles.Add(scriptBundle);
-
-			var styleBundle = new CustomStyleBundle("~/css/roxyfm").Include(
-				roxy + "css/jquery-ui-1.10.4.custom.css",
-				roxy + "css/main.css");
-			styleBundle.Orderer = new NullOrderer();
-			bundles.Add(styleBundle);
 		}
 
 		public int Priority

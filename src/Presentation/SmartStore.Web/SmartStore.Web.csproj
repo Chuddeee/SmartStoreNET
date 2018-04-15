@@ -862,23 +862,25 @@
     <Content Include="Content\editors\summernote\lang\summernote-uk-UA.js" />
     <Content Include="Content\editors\summernote\lang\summernote-zh-CN.js" />
     <Content Include="Content\editors\summernote\lang\summernote-zh-TW.js" />
-    <Content Include="Content\editors\summernote\plugin\image\lang\de-DE.js" />
-    <Content Include="Content\editors\summernote\plugin\image\lang\es-ES.js" />
-    <Content Include="Content\editors\summernote\plugin\image\lang\fr-FR.js" />
-    <Content Include="Content\editors\summernote\plugin\image\lang\it-IT.js" />
-    <Content Include="Content\editors\summernote\plugin\image\lang\pt-BR.js" />
-    <Content Include="Content\editors\summernote\plugin\image\lang\ru-RU.js" />
-    <Content Include="Content\editors\summernote\plugin\image\lang\tr-TR.js" />
-    <Content Include="Content\editors\summernote\plugin\image\lang\zh-TW.js" />
-    <Content Include="Content\editors\summernote\plugin\image\summernote-image-attributes.js" />
-    <Content Include="Content\editors\summernote\plugin\link\smartstore.link.js" />
-    <Content Include="Content\editors\summernote\plugin\media\smartstore.media.js" />
+    <Content Include="Content\editors\summernote\plugins\lang\de-DE.js" />
+    <Content Include="Content\editors\summernote\plugins\lang\es-ES.js" />
+    <Content Include="Content\editors\summernote\plugins\lang\fr-FR.js" />
+    <Content Include="Content\editors\summernote\plugins\lang\it-IT.js" />
+    <Content Include="Content\editors\summernote\plugins\lang\pt-BR.js" />
+    <Content Include="Content\editors\summernote\plugins\lang\ru-RU.js" />
+    <Content Include="Content\editors\summernote\plugins\lang\tr-TR.js" />
+    <Content Include="Content\editors\summernote\plugins\lang\zh-TW.js" />
+    <Content Include="Content\editors\summernote\plugins\smartstore.cssclass.js" />
+    <Content Include="Content\editors\summernote\plugins\smartstore.tablestyles.js" />
+    <Content Include="Content\editors\summernote\plugins\smartstore.link.js" />
+    <Content Include="Content\editors\summernote\plugins\smartstore.image.js" />
     <Content Include="Content\editors\summernote\summernote-bs4.css" />
     <Content Include="Content\editors\summernote\summernote-bs4.js" />
     <Content Include="Content\editors\summernote\summernote-bs4.min.js" />
     <Content Include="Content\fontastic\fontastic.css" />
     <Content Include="Content\fontastic\fonts\fontastic.svg" />
     <Content Include="Content\placeholder.txt" />
+    <Content Include="Content\print-rtl.css" />
     <Content Include="Content\vendors\drift\Drift.js" />
     <Content Include="Content\vendors\drift\Drift.min.js" />
     <Content Include="Content\vendors\fileuploader\images\loading.gif" />
@@ -1024,7 +1026,9 @@
     <Content Include="Content\editors\summernote\font\summernote.eot" />
     <Content Include="Content\editors\summernote\font\summernote.ttf" />
     <Content Include="Content\editors\summernote\font\summernote.woff" />
-    <Content Include="Content\editors\summernote\plugin\image\LICENSE" />
+    <Content Include="Content\shared\_rtl.scss" />
+    <Content Include="App_Data\widgetzones.json" />
+    <Content Include="Content\skinning\_rtl.scss" />
     <None Include="Content\vendors\x-editable\README.txt" />
     <Content Include="favicon.ico" />
     <Content Include="favicon.readme.txt" />
@@ -1763,7 +1767,6 @@
     <Content Include="Views\Shared\Partials\Comment.List.cshtml" />
     <Content Include="Views\ShoppingCart\Partials\WishlistItems.cshtml" />
     <Content Include="Themes\Flex\Content\_block.scss" />
-    <Content Include="Themes\Flex\Content\_choice.scss" />
     <Content Include="Themes\Flex\Content\_layout.scss" />
     <Content Include="Views\ShoppingCart\Partials\_RewardPointsBox.cshtml" />
     <Content Include="Themes\Flex\Content\_print.scss" />
@@ -1779,6 +1782,10 @@
     <Content Include="Themes\Flex\Views\Shared\EmailTemplates\address.liquid" />
     <Content Include="Themes\Flex\Views\Shared\EmailTemplates\order.liquid" />
     <Content Include="Themes\Flex\Views\Shared\EmailTemplates\shipment.liquid" />
+    <Content Include="Themes\Flex\Content\theme-rtl.scss" />
+    <Content Include="Content\shared\_rtl-bs4.scss" />
+    <Content Include="Views\Shared\DisplayTemplates\DateTime.cshtml" />
+    <Content Include="Themes\Flex\Content\_fonts.scss" />
     <None Include="Web.EFMigrations.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

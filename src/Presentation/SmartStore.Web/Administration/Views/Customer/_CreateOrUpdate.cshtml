@@ -1,5 +1,6 @@
-﻿@model CustomerModel
-@using SmartStore.Core.Domain.Orders;
+﻿@using SmartStore.Core.Domain.Orders;
+@model CustomerModel
+
 @Html.ValidationSummary(false)
 
 @if (Model.Id == 0)
@@ -7,7 +8,7 @@
 	@Html.HiddenFor(model => model.Id)
 }
 
-@Html.SmartStore().TabStrip().Name("customer-edit").Style(TabsStyle.Material).Position(TabsPosition.Top).Items(x =>
+@Html.SmartStore().TabStrip().Name("customer-edit").OnAjaxSuccess("customerEditTab_onAjaxSuccess").Style(TabsStyle.Material).Position(TabsPosition.Top).Items(x =>
 {
 	x.Add().Text(T("Admin.Customers.Customers.Info").Text).Content(TabInfo()).Selected(true);
 	x.Add().Text(T("Admin.Customers.Customers.CustomerRoles").Text).Content(TabCustomerRoles());
@@ -22,8 +23,7 @@
 		}
 		
 		x.Add().Text(T("Admin.Customers.Customers.Addresses").Text).Content(TabAddresses());
-		x.Add().Text(T("Admin.Customers.Customers.CurrentShoppingCart").Text).Content(TabCurrentShoppingCart());
-		x.Add().Text(T("Admin.Customers.Customers.CurrentWishlist").Text).Content(TabCurrentWishlist());
+		x.Add().Text(T("Admin.Customers.Customers.CurrentCart").Text).Content(TabCurrentShoppingCart());
 		x.Add().Text(T("Admin.Customers.Customers.Impersonate").Text).Content(TabImpersonate());
 	}
 
@@ -33,34 +33,6 @@
 
 @helper TabInfo()
 { 
-    if (Model.CountryEnabled && Model.StateProvinceEnabled)
-    {
-        <script type="text/javascript">
-             $(function() {
-                    $("#@Html.FieldIdFor(model => model.CountryId)").change(function() {
-                        var selectedItem = $(this).val();
-                        var ddlStates = $("#@Html.FieldIdFor(model => model.StateProvinceId)");
-                        $.ajax({
-                            cache:false,
-                            type: "GET",
-                            url: "@(Url.Action("GetStatesByCountryId", "Country"))",
-                            data: { "countryId": selectedItem, "addEmptyStateIfRequired": "true" },
-                            success: function (data) {
-                                ddlStates.html('');
-                                $.each(data, function(id, option) {
-                                    ddlStates.append($('<option></option>').val(option.id).html(option.name));
-                                });
-                                ddlStates.trigger("change");
-                            },
-                            error:function (xhr, ajaxOptions, thrownError){
-                                alert('Failed to retrieve states.')
-                            }  
-                        });
-                    });
-                });
-        </script>
-    }
-
     <table class="adminContent">
 		@if (Model.Id != 0)
 		{
@@ -288,7 +260,14 @@
                     @Html.SmartLabelFor(model => model.CountryId)
                 </td>
                 <td class="adminData">
-                    @Html.DropDownList("CountryId", Model.AvailableCountries)
+					@Html.DropDownList("CountryId", Model.AvailableCountries,
+					new
+					{
+						@class = "form-control country-input country-selector",
+						data_region_control_selector = "#StateProvinceId",
+						data_states_ajax_url = Url.Action("GetStatesByCountryId", "Country"),
+						data_addEmptyStateIfRequired = "true"
+					})
                 </td>
             </tr>
         }
@@ -416,7 +395,9 @@
 					@Html.SmartLabelFor(model => model.CreatedOn)
 				</td>
 				<td class="adminData">
-					@Html.TextBoxFor(model => model.CreatedOn, new { @readonly = "readonly", @class = "form-control-plaintext" })
+					<div class="form-control-plaintext">
+						@Html.DisplayFor(model => model.CreatedOn)
+					</div>
 				</td>
 			</tr>
             <tr>
@@ -424,7 +405,9 @@
                     @Html.SmartLabelFor(model => model.LastActivityDate)
                 </td>
                 <td class="adminData">
-                    @Html.TextBoxFor(model => model.LastActivityDate, new { @readonly = "readonly", @class = "form-control-plaintext" })
+					<div class="form-control-plaintext">
+						@Html.DisplayFor(model => model.LastActivityDate)
+					</div>
                 </td>
             </tr>
         }
@@ -661,51 +644,56 @@
 
 @helper TabCurrentShoppingCart()
 {
-	@(Html.Telerik().Grid<ShoppingCartItemModel>()
-		.Name("currentshoppingcart-grid")
-		.Columns(columns =>
-		{
-			columns.Bound(sci => sci.ProductName)
-				.Template(x => @Html.LabeledProductName(x.ProductId, x.ProductName, x.ProductTypeName, x.ProductTypeLabelHint))
-				.ClientTemplate(@Html.LabeledProductName("ProductId", "ProductName"));
-			columns.Bound(sci => sci.Quantity).Centered().Width(100);
-			columns.Bound(sci => sci.UnitPrice).RightAlign().Width(120);
-			columns.Bound(sci => sci.Total).RightAlign().Width(120);
-			columns.Bound(sci => sci.Store).Width(300);
-			columns.Bound(sci => sci.UpdatedOn).Width(200);
-		})
-		.DataBinding(dataBinding => dataBinding.Ajax()
-		.Select("GetCartList", "Customer", new
-		{
-			customerId = Model.Id,
-			cartTypeId = (int)ShoppingCartType.ShoppingCart
-		}))
-    )
-}
 
-@helper TabCurrentWishlist()
-{
+	<h4 class="mt-3">@T("Admin.Customers.Customers.CurrentShoppingCart")</h4>
 
-    @(Html.Telerik().Grid<ShoppingCartItemModel>()
-		.Name("currentwishlist-grid")
-		.Columns(columns =>
-		{
-			columns.Bound(sci => sci.ProductName)
-				.Template(x => @Html.LabeledProductName(x.ProductId, x.ProductName, x.ProductTypeName, x.ProductTypeLabelHint))
-				.ClientTemplate(@Html.LabeledProductName("ProductId", "ProductName"));
-			columns.Bound(sci => sci.Quantity).Centered().Width(100);
-			columns.Bound(sci => sci.UnitPrice).RightAlign().Width(120);
-			columns.Bound(sci => sci.Total).RightAlign().Width(120);
-			columns.Bound(sci => sci.Store).Width(300);
-			columns.Bound(sci => sci.UpdatedOn).Width(200);
-		})
-		.DataBinding(dataBinding => dataBinding.Ajax()
-		.Select("GetCartList", "Customer", new
-		{
-			customerId = Model.Id,
-			cartTypeId = (int)ShoppingCartType.Wishlist
-		}))
-	)
+	<div class="mt-3">
+		@(Html.Telerik().Grid<ShoppingCartItemModel>()
+			.Name("currentshoppingcart-grid")
+			.Columns(columns =>
+			{
+				columns.Bound(sci => sci.ProductName)
+					.Template(x => @Html.LabeledProductName(x.ProductId, x.ProductName, x.ProductTypeName, x.ProductTypeLabelHint))
+					.ClientTemplate(@Html.LabeledProductName("ProductId", "ProductName"));
+				columns.Bound(sci => sci.Quantity).Centered().Width(100);
+				columns.Bound(sci => sci.UnitPrice).RightAlign().Width(120);
+				columns.Bound(sci => sci.Total).RightAlign().Width(120);
+				columns.Bound(sci => sci.Store).Width(300);
+				columns.Bound(sci => sci.UpdatedOn).Width(200);
+			})
+			.DataBinding(dataBinding => dataBinding.Ajax()
+			.Select("GetCartList", "Customer", new
+			{
+				customerId = Model.Id,
+				cartTypeId = (int)ShoppingCartType.ShoppingCart
+			}))
+		)
+	</div>
+
+	<h4 class="mt-5">@T("Admin.Customers.Customers.CurrentWishlist")</h4>
+
+	<div class="mt-3">
+		@(Html.Telerik().Grid<ShoppingCartItemModel>()
+			.Name("currentwishlist-grid")
+			.Columns(columns =>
+			{
+				columns.Bound(sci => sci.ProductName)
+					.Template(x => @Html.LabeledProductName(x.ProductId, x.ProductName, x.ProductTypeName, x.ProductTypeLabelHint))
+					.ClientTemplate(@Html.LabeledProductName("ProductId", "ProductName"));
+				columns.Bound(sci => sci.Quantity).Centered().Width(100);
+				columns.Bound(sci => sci.UnitPrice).RightAlign().Width(120);
+				columns.Bound(sci => sci.Total).RightAlign().Width(120);
+				columns.Bound(sci => sci.Store).Width(300);
+				columns.Bound(sci => sci.UpdatedOn).Width(200);
+			})
+			.DataBinding(dataBinding => dataBinding.Ajax()
+			.Select("GetCartList", "Customer", new
+			{
+				customerId = Model.Id,
+				cartTypeId = (int)ShoppingCartType.Wishlist
+			}))
+		)
+	</div>
 }
 
 @helper TabImpersonate()
@@ -724,3 +712,9 @@
 		</button>
 	</p>
 }
+
+<script>
+	function customerEditTab_onAjaxSuccess(tab, pane) {
+		applyCommonPlugins(pane);
+	}
+</script>

@@ -6,7 +6,7 @@
 
 $sm-orange1:	#ee9B00;
 $sm-orange2:	#e77c00;
-$sm-green1:		#99b433;
+$sm-green1:		#44b284;
 $sm-bluegreen:	#2c8d8a;
 $sm-red1:		#ee1111;
 $sm-red2:		#dc3000;
@@ -98,12 +98,6 @@ $yiq-contrasted-threshold:	164;
 $yiq-text-dark:				$gray-800;
 $yiq-text-light:			#fff;
 
-$spacer: 1rem;
-$spacers: (
-    5: ($spacer * 2.25),
-    6: ($spacer * 3)
-);
-
 $font-size-base: 0.875rem;
 $font-size-lg:   1rem;
 $font-size-sm:   0.8125rem;
@@ -159,8 +153,8 @@ $btn-disabled-opacity:			0.5;
 $dropdown-box-shadow:			0 3px 12px rgba(27,31,35, 0.15); //0 2px 6px rgba(#000, .15);
 $dropdown-border-color:			rgba(#000, 0.08); 
 $dropdown-link-color:			$body-color; //$gray-800;
-$dropdown-link-hover-color:		#fff; //darken($gray-800, 5%);
-$dropdown-link-hover-bg:        $indigo;
+$dropdown-link-hover-color:		darken($dropdown-link-color, 5%);
+$dropdown-link-hover-bg:        lighten($gray-200, 3%);
 $dropdown-link-active-color:    $dropdown-link-hover-color;
 $dropdown-link-active-bg:       lighten($dropdown-link-hover-bg, 5%);
 $dropdown-item-padding-y:       0.625rem; // 0.5rem;
@@ -176,3 +170,24 @@ $alert-border-radius: 0;
 
 $nav-tabs-border-color:			#e1e4e8;
 $nav-tabs-link-active-color:	$gray-900;
+
+$component-active-bg:			lighten($primary, 36%);
+$component-active-color:		inherit;
+
+
+/*$custom-control-indicator-bg:				$gray-200;
+$custom-control-indicator-disabled-bg:		$gray-100;
+$custom-control-indicator-checked-color:	#fff;
+$custom-control-indicator-checked-bg:		$primary;
+$custom-control-indicator-active-color:		#fff;
+$custom-control-indicator-active-bg:		$component-active-bg;
+$custom-checkbox-indicator-indeterminate-bg:$primary;*/
+
+$custom-control-indicator-bg:					$gray-200;
+$custom-control-indicator-disabled-bg:			$gray-100;
+$custom-control-indicator-checked-color:		#fff;
+$custom-control-indicator-checked-bg:			$warning;
+$custom-control-indicator-active-color:			#fff;
+$custom-control-indicator-active-bg:			lighten($warning, 35%);
+$custom-checkbox-indicator-indeterminate-bg:	$warning;
+$custom-control-indicator-focus-box-shadow:		0 0 0 1px $body-bg, 0 0 0 $input-btn-focus-width rgba($warning, .25);

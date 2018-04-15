@@ -22,8 +22,16 @@
     width: 3rem;
     color: #fff;
     z-index: 10;
+	float: none;
+	margin: 0;
 
-    .alert-info &       { @include bubble('right', 'center', 8, $info, $info); }
+	@if $alert-info-is-primary {
+		// info should have primary color
+		.alert-info &	{ @include bubble('right', 'center', 8, $primary, $primary); }
+    }
+	@else {
+		.alert-info &	{ @include bubble('right', 'center', 8, $info, $info); }
+	}
     .alert-success &    { @include bubble('right', 'center', 8, $success, $success); }
     .alert-warning &    { @include bubble('right', 'center', 8, $warning, $warning); }
     .alert-danger &     { @include bubble('right', 'center', 8, $danger, $danger); }
@@ -37,6 +45,8 @@
         line-height: 1.2em;
         top: 50%;
         transform: translateY(-50%);
+		float: none;
+		margin: 0;
     }
 }
 

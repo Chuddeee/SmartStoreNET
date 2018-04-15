@@ -14,6 +14,7 @@ using System.IO;
 using SmartStore.Core.Async;
 using SmartStore.Core.Events;
 using SmartStore.Web.Framework.Security;
+using SmartStore.Core.Data;
 
 namespace SmartStore.Web.Controllers
 {
@@ -153,6 +154,14 @@ namespace SmartStore.Web.Controllers
 				return NotFound(null);
 			}
 
+			var tenantPrefix = DataSettings.Current.TenantName + "/";
+			if (path.StartsWith(tenantPrefix))
+			{
+				// V3.0.x comapt: in previous versions the file path
+				// contained the tenant name. Strip it out.
+				path = path.Substring(tenantPrefix.Length);
+			}
+
 			name = Path.GetFileName(path);
 
 			name.SplitToPair(out var nameWithoutExtension, out var extension, ".", true);
@@ -207,7 +216,7 @@ namespace SmartStore.Web.Controllers
 				{
 					// Redirect to existing remote file
 					Response.ContentType = mime;
-					return Redirect(_mediaFileSystem.GetPublicUrl(path));
+					return Redirect(_mediaFileSystem.GetPublicUrl(path, true));
 				}
 				else
 				{

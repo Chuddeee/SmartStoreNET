@@ -59,6 +59,8 @@ $footer-inverse-color-muted:    rgba(#fff, 0.5) !default;
 $footer-social-bg:              #aaa !default;
 $footer-social-color:           #fff !default;
 
+$facet-control-size:			20px;
+
 
 // Material tabs
 // ==============================================================
@@ -66,6 +68,25 @@ $footer-social-color:           #fff !default;
 $mtab-text-transform:		uppercase;
 $mtab-font-weight:			$font-weight-normal;
 $mtab-color:				inherit;
+
+//
+// Checkout Steps
+// --------------------------------------------------
+
+$costep-border:                 #f2f2f2;
+$costep-bg:                     #fff; 
+$costep-color:                  #ccc;
+$costep-label-color:            $body-color;
+
+$costep-visited-border:         $costep-progress-color;
+$costep-visited-bg:             $costep-progress-color;
+$costep-visited-color:          rgba(#fff, 0.85);
+$costep-visited-label-color:    $costep-label-color;
+
+$costep-active-border:          $costep-visited-border;
+$costep-active-bg:              #fff;
+$costep-active-color:           $body-color;
+$costep-active-label-color:     $costep-label-color;
 
 
 // Bootstrap variable overrides
@@ -85,12 +106,6 @@ $yiq-text-light:			#fff;
 
 $theme-colors: ( 
 	"gray": $gray-700 
-);
-
-$spacer: 1rem;
-$spacers: (
-    5: ($spacer * 2.25),
-    6: ($spacer * 3)
 );
 
 $line-height-base:              1.5;
@@ -150,11 +165,9 @@ $btn-disabled-opacity:			0.5;
 
 // Dropdown
 
-$dropdown-link-hover-color:     darken($gray-900, 5%);
-$dropdown-link-hover-bg:        $gray-100;
 $dropdown-link-active-color:    $dropdown-link-hover-color;
 $dropdown-link-active-bg:       darken($dropdown-link-hover-bg, 4%);
-$dropdown-border-color:         rgba(#000, .075);
+
 
 // Popover
 

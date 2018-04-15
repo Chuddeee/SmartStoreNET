@@ -374,7 +374,8 @@ namespace SmartStore.Admin.Controllers
 				p.StockQuantity > 0 &&
 				prevStockQuantity <= 0 &&
 				p.Published &&
-				!p.Deleted)
+				!p.Deleted &&
+				!p.IsSystemProduct)
 			{
 				_backInStockSubscriptionService.SendNotificationsToSubscribers(p);
 			}
@@ -2485,7 +2486,7 @@ namespace SmartStore.Admin.Controllers
                                 })
                                 .ToList();
 
-                            psaModel.SpecificationAttributeOptionsJsonString = HttpUtility.HtmlEncode(JsonConvert.SerializeObject(psaModel.SpecificationAttributeOptions));
+							psaModel.SpecificationAttributeOptionsUrl = Url.Action("GetOptionsByAttributeId", "SpecificationAttribute", new { attributeId = attributeId });
                         }
 
                         return psaModel;
@@ -2832,7 +2833,8 @@ namespace SmartStore.Admin.Controllers
 								product.StockQuantity > 0 &&
 								prevStockQuantity <= 0 &&
 								product.Published &&
-								!product.Deleted)
+								!product.Deleted && 
+								!product.IsSystemProduct)
 							{
 								_backInStockSubscriptionService.SendNotificationsToSubscribers(product);
 							}
@@ -3019,37 +3021,6 @@ namespace SmartStore.Admin.Controllers
 
 			return TierPriceList(command, productId);
 		}
-
-        public ActionResult AllCalculationMethods(string label, int selectedId)
-        {
-            var list = new List<object>
-            {
-                new
-				{
-					id = ((int)TierPriceCalculationMethod.Fixed).ToString(),
-					text = T("Admin.Product.Price.Tierprices.Fixed").Text,
-					selected = selectedId == (int)TierPriceCalculationMethod.Fixed
-				},
-                new
-				{
-					id = ((int)TierPriceCalculationMethod.Adjustment).ToString(),
-					text = T("Admin.Product.Price.Tierprices.Adjustment").Text,
-					selected = selectedId == (int)TierPriceCalculationMethod.Adjustment
-				},
-                new
-				{
-					id = ((int)TierPriceCalculationMethod.Percental).ToString(),
-					text = T("Admin.Product.Price.Tierprices.Percental").Text,
-					selected = selectedId == (int)TierPriceCalculationMethod.Percental
-				}
-            };
-
-            return new JsonResult
-			{
-				Data = list,
-				JsonRequestBehavior = JsonRequestBehavior.AllowGet
-			};
-        }
 
         #endregion
 

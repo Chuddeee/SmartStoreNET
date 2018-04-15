@@ -190,7 +190,8 @@ namespace SmartStore.Admin.Infrastructure
 				.ForMember(dest => dest.Locales, mo => mo.Ignore())
 				.ForMember(dest => dest.AvailableStores, mo => mo.Ignore())
 				.ForMember(dest => dest.SelectedStoreIds, mo => mo.Ignore())
-				.ForMember(dest => dest.AvailableTitleTags, mo => mo.Ignore());
+				.ForMember(dest => dest.AvailableTitleTags, mo => mo.Ignore())
+				.ForMember(dest => dest.AvailableWidgetZones, mo => mo.Ignore());
 
             CreateMap<TopicModel, Topic>()
                 .ForMember(dest => dest.IsSystemTopic, mo => mo.Ignore());
@@ -319,6 +320,7 @@ namespace SmartStore.Admin.Infrastructure
 				.ForMember(dest => dest.CreatedOnUtc, mo => mo.Ignore())
 				.ForMember(dest => dest.UpdatedOnUtc, mo => mo.Ignore())
 				.ForMember(dest => dest.Deleted, mo => mo.Ignore())
+				.ForMember(dest => dest.IsSystemProduct, mo => mo.Ignore())
 				.ForMember(dest => dest.DeliveryTime, mo => mo.Ignore())
 				.ForMember(dest => dest.QuantityUnit, mo => mo.Ignore())
 				.ForMember(dest => dest.MergedDataIgnore, mo => mo.Ignore())
